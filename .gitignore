@@ -1,18 +1,16 @@
 ```
-# Build artifacts
-/build/
-/dist/
-
 # Dependencies
-/pubspec.lock
-/.dart_tool/
-/packages/
+.dart_tool/
+.packages
+.pub/
+pubspec.lock
 
 # Logs and temp files
 *.log
 *.tmp
+*.swp
 
-# Environment
+# Environment variables
 .env
 .env.local
 *.env.*
@@ -20,25 +18,8 @@
 # Editors
 .vscode/
 .idea/
-*.swp
-*.swo
 
-# OS generated files
-.DS_Store
-Thumbs.db
-
-# Coverage
-/coverage/
-/htmlcov/
-.coverage
-
-# Temporary files
-*.tmp
-*.temp
-*.bak
-
-# Cache directories
-.mypy_cache/
-.pytest_cache/
-.cache/
+# Build outputs
+build/
+dist/
 ```
