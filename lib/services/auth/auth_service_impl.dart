@@ -13,7 +13,7 @@
 // their own quota, preventing abuse and rate limiting issues.
 
 import 'package:flutter/material.dart';
-import 'package:google_signin/google_signin.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'auth_service.dart';

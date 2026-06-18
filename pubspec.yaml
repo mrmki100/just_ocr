@@ -54,7 +54,7 @@ dependencies:
   flutter_tts: ^4.2.5
 
   # Authentication
-  google_signin: ^6.2.1
+  google_sign_in: ^6.2.1
   url_launcher: ^6.3.1
 
   # Utility

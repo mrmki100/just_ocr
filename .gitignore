@@ -1,28 +1,44 @@
 ```
+# Build artifacts
+/build/
+/dist/
+
 # Dependencies
-.pub/
-.packages
-build/
+/pubspec.lock
+/.dart_tool/
+/packages/
+
+# Logs and temp files
+*.log
+*.tmp
 
 # Environment
 .env
 .env.local
 *.env.*
 
-# Logs
-*.log
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
 
 # OS generated files
 .DS_Store
 Thumbs.db
 
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*.tmp
+# Coverage
+/coverage/
+/htmlcov/
+.coverage
 
-# Dart specific
-.dart_tool/
+# Temporary files
+*.tmp
+*.temp
+*.bak
+
+# Cache directories
+.mypy_cache/
+.pytest_cache/
+.cache/
 ```
