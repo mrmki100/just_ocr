@@ -1,0 +1,17 @@
+// lib/services/auth/auth_service.dart
+// Abstract authentication service interface
+
+import 'package:flutter/material.dart';
+
+abstract class AuthService {
+  Future<bool> signInWithGoogle();
+  Future<void> signOut();
+  Future<String?> getApiKey();
+  Future<void> saveApiKey(String apiKey);
+  bool get isLoggedIn;
+  String? get userEmail;
+  
+  /// Shows the API key setup dialog after login
+  /// Returns the API key if user successfully entered it, null otherwise
+  Future<String?> showApiKeySetupDialog(BuildContext context);
+}

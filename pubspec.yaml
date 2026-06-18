@@ -30,31 +30,36 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: ^0.19.0
   
   # State Management & Routing
-  flutter_riverpod: ^2.5.1  # Or provider/bloc, but riverpod fits this state machine perfectly
-  go_router: ^13.2.0        # For clean navigation states
+  flutter_riverpod: ^2.5.1
+  go_router: ^13.2.0
 
   # Storage & Database
-  isar: ^3.1.0              # Core local database
-  isar_flutter_libs: ^3.1.0 # Isar binaries
-  path_provider: ^2.1.2     # For finding document directories
-  shared_preferences: ^2.5.5 # For lightweight app settings
+  isar: ^3.1.0
+  isar_flutter_libs: ^3.1.0
+  path_provider: ^2.1.2
+  shared_preferences: ^2.5.5
 
   # Document Parsing & OCR
   google_mlkit_text_recognition: ^0.15.1
-  google_generative_ai: ^0.2.2 # Gemini fallback
-  syncfusion_flutter_pdfviewer: ^33.2.12 # For rendering PDFs (robust choice)
-  epub_view: ^3.2.0         # For EPUB parsing
+  google_generative_ai: ^0.2.2
+  syncfusion_flutter_pdfviewer: ^33.2.12
+  epub_view: ^3.2.0
 
   # TTS & Audio
   flutter_tts: ^4.2.5
 
+  # Authentication
+  google_signin: ^6.2.1
+  url_launcher: ^6.3.1
+
   # Utility
-  uuid: ^4.3.3              # For generating session/event IDs
-  logger: ^2.0.2            # For developer console formatting
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
+  uuid: ^4.3.3
+  logger: ^2.0.2
   cupertino_icons: ^1.0.8
   google_mlkit_commons: ^0.11.1
   file_selector: ^1.1.0
