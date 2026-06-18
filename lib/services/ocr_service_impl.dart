@@ -30,15 +30,8 @@ class OcrServiceImpl implements OcrService {
     }
     
     _geminiModel = GenerativeModel(
-      model: 'gemini-2.5-flash',
+      model: 'gemini-2.0-flash',
       apiKey: apiKey,
-      systemInstruction: Content.system(
-        'You are a high-fidelity Persian/Arabic OCR scanner. '
-        'Extract ALL text verbatim including Persian (Farsi), Arabic, and English. '
-        'Maintain exact paragraph structure, line breaks, and formatting. '
-        'Do NOT translate, summarize, or correct spelling. '
-        'Output ONLY the extracted text with no additional commentary.'
-      ),
     );
   }
 
@@ -181,9 +174,10 @@ class OcrServiceImpl implements OcrService {
       Content.multi([
         DataPart('image/jpeg', imageBytes),
         TextPart(
-          'Extract ALL text from this image exactly as written. '
-          'Preserve paragraph breaks and line structure. '
-          'Output ONLY the text, nothing else.',
+          'You are a high-fidelity Persian/Arabic OCR scanner. '\
+          'Extract ALL text from this image exactly as written. '\
+          'Preserve paragraph breaks and line structure. '\
+          'Output ONLY the extracted text, nothing else.',
         ),
       ]),
     ];

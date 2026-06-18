@@ -46,7 +46,7 @@ dependencies:
 
   # Document Parsing & OCR
   google_mlkit_text_recognition: ^0.15.1
-  google_generative_ai: ^0.2.2
+  google_generative_ai: ^0.4.6
   syncfusion_flutter_pdfviewer: ^33.2.12
   epub_view: ^3.2.0
 

@@ -1,55 +1,28 @@
 ```
 # Dependencies
-.dart_tool/
-.build/
-dependencies/
+.pub/
 .packages
-
-# Generated code
-lib/generated/
-lib/l10n/app_localizations*
-
-# Build outputs
 build/
-**/build/
-
-# IDE files
-.idea/
-.vscode/
-*.swp
-*.swo
-
-# Logs
-*.log
-**/*.log
 
 # Environment
 .env
 .env.local
 *.env.*
 
+# Logs
+*.log
+
 # OS generated files
 .DS_Store
 Thumbs.db
 
-# Temporary files
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
 *.tmp
-**/*.tmp
 
-# Coverage
-coverage/
-htmlcov/
-.coverage
-
-# Distribution packages
-*.tar.gz
-*.zip
-*.gz
-*.tar
-*.tgz
-*.bz2
-*.xz
-*.7z
-*.rar
-*.zst
+# Dart specific
+.dart_tool/
 ```
