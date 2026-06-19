@@ -12,8 +12,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:justcr/features/reader/book_notifier.dart';
-import 'package:justcr/features/reader/book_state.dart';
+import 'package:just_ocr/features/reader/book_notifier.dart';
+import 'package:just_ocr/features/reader/book_state.dart';
 
 class ScanTab extends ConsumerWidget {
   const ScanTab({super.key});
@@ -161,7 +161,7 @@ class ScanTab extends ConsumerWidget {
                 Text(
                   'لمس برای اسکن',
                   textDirection: TextDirection.rtl,
-                  style: theme.textTheme.titleMedium?.copyWith(
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     color: colors.onPrimaryContainer,
                     fontWeight: FontWeight.bold,
                   ),

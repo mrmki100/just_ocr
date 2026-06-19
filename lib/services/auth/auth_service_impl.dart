@@ -331,8 +331,8 @@ class AuthServiceImpl implements AuthService {
           return TextDirection.ltr;
       }
     } catch (e) {
-      // Fallback to RTL for Persian/Arabic apps
-      return TextDirection.rtl;
+      // Fallback to LTR if localization fails
+      return TextDirection.ltr;
     }
   }
 }
