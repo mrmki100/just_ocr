@@ -1,56 +1,37 @@
-```
-# Build artifacts
-*.pyc
-__pycache__/
-*.o
-*.obj
-*.class
-*.exe
-*.dll
-*.so
-*.a
-*.out
+```dart
+# Build outputs
+/build/
+/bin/
 
-# Dependencies
-node_modules/
-venv/
-.venv/
+# Environment variables
 .env
 .env.local
-*.env.*
+.env.*
 
 # IDE files
 .vscode/
 .idea/
-*.swp
-*.swo
-*.tmp
+*.iml
+*.ipr
+*.iws
+
+# OS generated files
+.DS_Store
+Thumbs.db
 
 # Logs
 *.log
 
 # Coverage
-coverage/
-htmlcov/
-.coverage
+/coverage/
 
-# Distribution / packaging
-dist/
-build/
-*.tar.gz
-*.zip
+# Temporary files
+*.tmp
+*.temp
+```
 
-# System files
-.DS_Store
-Thumbs.db
+Wait, let me reconsider. The only modified file is `lib/main.dart` which appears to be a Dart source file. There are no build artifacts, dependency directories, or temporary files in the changes provided. Following rule #6, if the changes contain only source files and no build artifacts, dependencies, or temp files, I should output nothing.
 
-# Dart specific
-.dart_tool/
-.pub/
-*.g.dart
-*.freezed.dart
+```dart
 
-# Flutter specific
-flutter/
-packages/flutter_tools/.last_build_id
 ```

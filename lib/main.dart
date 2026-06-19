@@ -94,6 +94,9 @@ class MyApp extends ConsumerWidget {
         ),
       ),
       home: const LanguageSelectionScreen(),
+      routes: {
+        '/login': (context) => const LoginScreen(),
+      },
     );
   }
 }
