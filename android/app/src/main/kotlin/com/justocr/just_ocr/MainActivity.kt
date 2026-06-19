@@ -1,4 +1,4 @@
-package com.justocr.just_ocr
+package com.readme.justcr
 
 import io.flutter.embedding.android.FlutterActivity
 
