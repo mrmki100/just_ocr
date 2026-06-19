@@ -17,7 +17,6 @@ class IsarService {
     db = await Isar.open(
       [
         ScanEventSchema,
-        BookSchema, // Add Book model for library storage
       ],
       directory: dir.path,
       inspector: true, // Allows us to view the DB in the browser later

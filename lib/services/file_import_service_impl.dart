@@ -1,7 +1,8 @@
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
+import '../features/reader/book_notifier.dart';
 
-class FileImportServiceImpl {
+class FileImportServiceImpl implements FileImportService {
   @override
   Future<File?> pickFile() async {
     final FilePickerResult? result = await FilePicker.platform.pickFiles(
