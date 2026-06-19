@@ -1,19 +1,26 @@
 import 'dart:io';
-import 'package:file_picker/file_picker.dart';
+import 'package:file_selector/file_selector.dart';
 import '../features/reader/book_notifier.dart';
 
 class FileImportServiceImpl implements FileImportService {
   @override
   Future<File?> pickFile() async {
-    final FilePickerResult? result = await FilePicker.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['pdf', 'png', 'jpg', 'jpeg'],
-      allowMultiple: false,
-    );
+    // Define accepted file types
+    final List<XTypeGroup> typeGroups = [
+      const XTypeGroup(
+        label: 'Documents',
+        extensions: ['pdf', 'png', 'jpg', 'jpeg'],
+      ),
+    ];
 
-    if (result == null || result.files.single.path == null) {
+    // Open file selector
+    final XFile? xFile = await openFile(acceptedTypeGroups: typeGroups);
+
+    if (xFile == null) {
       return null;
     }
-    return File(result.files.single.path!);
+
+    // Convert XFile to File
+    return File(xFile.path);
   }
 }
