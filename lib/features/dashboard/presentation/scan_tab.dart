@@ -12,8 +12,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:just_ocr/features/reader/book_notifier.dart';
-import 'package:just_ocr/features/reader/book_state.dart';
+import 'package:justcr/features/reader/book_notifier.dart';
+import 'package:justcr/features/reader/book_state.dart';
 
 class ScanTab extends ConsumerWidget {
   const ScanTab({super.key});

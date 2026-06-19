@@ -173,12 +173,12 @@ class OcrServiceImpl implements OcrService {
     final content = [
       Content.multi([
         DataPart('image/jpeg', imageBytes),
-        TextPart(
-          'You are a high-fidelity Persian/Arabic OCR scanner. '\
-          'Extract ALL text from this image exactly as written. '\
-          'Preserve paragraph breaks and line structure. '\
-          'Output ONLY the extracted text, nothing else.',
-        ),
+        const TextPart(
+            'You are a high-fidelity Persian/Arabic OCR scanner. '
+            'Extract ALL text from this image exactly as written. '
+            'Preserve paragraph breaks and line structure. '
+            'Output ONLY the extracted text, nothing else.',
+          ),
       ]),
     ];
 
