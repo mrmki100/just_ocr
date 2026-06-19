@@ -3,31 +3,23 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'data/database/isar_service.dart';
-import 'features/auth/presentation/login_screen.dart';
-import 'features/dashboard/presentation/main_dashboard.dart';
-import 'features/reader/book_notifier.dart';
-import 'features/language/presentation/language_selection_screen.dart';
-import 'l10n/app_language.dart';
-import 'l10n/app_localizations.dart';
-import 'services/file_import_service_impl.dart';
-import 'services/ocr_service_impl.dart';
-import 'services/auth/auth_service_impl.dart';
+// 1. Strictly using 'package:' imports prevents the Dart split-brain type mismatch!
+import 'package:just_ocr/features/l10n/app_localizations.dart';
+import 'package:just_ocr/features/l10n/app_language.dart'; 
+import 'package:just_ocr/data/database/isar_service.dart';
+import 'package:just_ocr/features/auth/presentation/login_screen.dart';
+import 'package:just_ocr/features/dashboard/presentation/main_dashboard.dart';
+import 'package:just_ocr/features/language/presentation/language_selection_screen.dart';
+import 'package:just_ocr/services/file_import_service_impl.dart';
+import 'package:just_ocr/services/ocr_service_impl.dart';
 
 void main() async {
-  // 1. Enforce binding initialization before async native channels run
   WidgetsFlutterBinding.ensureInitialized();
-  
-  // 2. Boot up the local Isar Database engine
   await IsarService.initialize();
-
-  // 3. Initialize SharedPreferences for reading position persistence
   final SharedPreferences prefs = await SharedPreferences.getInstance();
 
   runApp(
     ProviderScope(
-      // 4. Overriding the abstract stubs injects concrete instances 
-      // globally across the Riverpod graph without tight coupling.
       overrides: [
         sharedPreferencesProvider.overrideWithValue(prefs),
         fileImportServiceProvider.overrideWith((ref) => FileImportServiceImpl()),
@@ -49,7 +41,6 @@ class MyApp extends ConsumerWidget {
       title: 'justOCR',
       debugShowCheckedModeBanner: false,
       
-      // Localization setup
       locale: appLanguage.locale,
       localizationsDelegates: const [
         AppLocalizations.delegate,
@@ -64,7 +55,6 @@ class MyApp extends ConsumerWidget {
         Locale('en'),
       ],
       
-      // RTL support
       builder: (context, child) {
         return Directionality(
           textDirection: appLanguage.textDirection,
@@ -78,8 +68,7 @@ class MyApp extends ConsumerWidget {
           seedColor: Colors.deepPurple,
           brightness: Brightness.light,
         ),
-        // Accessibility improvements
-        fontFamily: 'Vazirmatn', // Consider adding a Persian font
+        fontFamily: 'Vazirmatn', 
         textTheme: const TextTheme(
           bodyLarge: TextStyle(fontSize: 18, height: 1.6),
           bodyMedium: TextStyle(fontSize: 16, height: 1.5),
@@ -93,7 +82,10 @@ class MyApp extends ConsumerWidget {
           surface: Colors.white,
         ),
       ),
+      
       home: const LanguageSelectionScreen(),
+      
+      // 2. This maps the button click to the actual Login Screen!
       routes: {
         '/login': (context) => const LoginScreen(),
       },
