@@ -58,9 +58,13 @@ class ScanTab extends ConsumerWidget {
 
           // Main action button
           if (!isImporting && !hasDocument) ...[
-            _buildScanButton(
-              context,
-              onPressed: notifier.importDocument,
+            Expanded(
+              child: Center(
+                child: _buildScanButton(
+                  context,
+                  onPressed: notifier.importDocument,
+                ),
+              ),
             ),
           ],
 

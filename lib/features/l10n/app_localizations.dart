@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'app_language.dart';
 
 /// Localization strings for the justOCR app
 /// Supports: Persian (fa), Dutch (nl), Arabic (ar), English (en)

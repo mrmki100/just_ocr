@@ -1,32 +1,61 @@
 ```
 # Build artifacts
-/build/
-/dist/
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.dll
+*.dylib
+*.exe
 
 # Dependencies
-/pub/
-/.dart_tool/
-/packages/
+node_modules/
+vendor/
+build/
+dist/
+target/
 
-# Logs and temp files
+# Logs
 *.log
-*.tmp
 
 # Environment
 .env
 .env.local
 *.env.*
 
-# Editors
+# IDE files
 .vscode/
 .idea/
 *.swp
 *.swo
+*.tmp
 
 # OS generated files
 .DS_Store
 Thumbs.db
 
-# Coverage
-/coverage/
+# Dart/Flutter specific
+.dart_tool/
+.pub/
+build/
+coverage/
+*.g.dart
+*.freezed.dart
+
+# Compressed files
+*.zip
+*.gz
+*.tar
+*.tgz
+*.bz2
+*.xz
+*.7z
+*.rar
+*.Z
+*.lz
+*.lzo
+*.tar.gz
+*.tar.bz2
+*.tar.xz
 ```
