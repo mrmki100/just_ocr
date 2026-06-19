@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-// 1. Strictly using 'package:' imports prevents the Dart split-brain type mismatch!
 import 'package:just_ocr/features/l10n/app_localizations.dart';
 import 'package:just_ocr/features/l10n/app_language.dart'; 
 import 'package:just_ocr/data/database/isar_service.dart';
@@ -12,6 +11,7 @@ import 'package:just_ocr/features/dashboard/presentation/main_dashboard.dart';
 import 'package:just_ocr/features/language/presentation/language_selection_screen.dart';
 import 'package:just_ocr/services/file_import_service_impl.dart';
 import 'package:just_ocr/services/ocr_service_impl.dart';
+import 'package:just_ocr/features/reader/book_notifier.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
