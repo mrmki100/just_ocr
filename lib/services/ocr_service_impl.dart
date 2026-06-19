@@ -175,7 +175,7 @@ class OcrServiceImpl implements OcrService {
     final content = [
       Content.multi([
         DataPart('image/jpeg', imageBytes),
-        const TextPart(
+        TextPart(
             'You are a high-fidelity Persian/Arabic OCR scanner. '
             'Extract ALL text from this image exactly as written. '
             'Preserve paragraph breaks and line structure. '

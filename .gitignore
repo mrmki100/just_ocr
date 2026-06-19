@@ -2,60 +2,45 @@
 # Build artifacts
 *.o
 *.obj
-*.a
-*.lib
-*.so
-*.dll
-*.dylib
 *.exe
+*.dll
+*.so
+*.a
+*.out
 
 # Dependencies
 node_modules/
-vendor/
-build/
-dist/
+venv/
+.venv/
+__pycache__/
+.mypy_cache/
+.pytest_cache/
 target/
+.gradle/
 
-# Logs
-*.log
-
-# Environment
-.env
-.env.local
-*.env.*
-
-# IDE files
+# Editor/IDE files
 .vscode/
 .idea/
 *.swp
 *.swo
 *.tmp
 
-# OS generated files
-.DS_Store
-Thumbs.db
+# Logs
+*.log
 
-# Dart/Flutter specific
-.dart_tool/
-.pub/
-build/
+# Coverage
 coverage/
-*.g.dart
-*.freezed.dart
+htmlcov/
+.coverage
 
-# Compressed files
-*.zip
-*.gz
-*.tar
-*.tgz
-*.bz2
-*.xz
-*.7z
-*.rar
-*.Z
-*.lz
-*.lzo
+# Distribution / packaging
+dist/
+build/
 *.tar.gz
-*.tar.bz2
-*.tar.xz
+*.zip
+
+# Environment variables
+.env
+.env.local
+*.env.*
 ```

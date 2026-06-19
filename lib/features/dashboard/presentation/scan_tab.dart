@@ -72,7 +72,7 @@ class ScanTab extends ConsumerWidget {
           if (isImporting) ...[
             Expanded(
               child: Center(
-                child: _buildProgressView(state as BookImporting),
+                child: _buildProgressView(context, state as BookImporting),
               ),
             ),
           ],
@@ -178,7 +178,7 @@ class ScanTab extends ConsumerWidget {
     );
   }
 
-  Widget _buildProgressView(BookImporting state) {
+  Widget _buildProgressView(BuildContext context, BookImporting state) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 32),
       child: Column(
