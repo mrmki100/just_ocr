@@ -40,6 +40,7 @@ typedef ProgressCallback = void Function(String message, double? progress);
 /// the selected file. Returns null if the user cancels the picker.
 abstract class FileImportService {
   Future<File?> pickFile();
+  List<String> getSupportedFormats();
 }
 
 /// Responsible for processing a file through the full OCR pipeline and

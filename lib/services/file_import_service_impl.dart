@@ -23,4 +23,9 @@ class FileImportServiceImpl implements FileImportService {
     // Convert XFile to File
     return File(xFile.path);
   }
+
+  @override
+  List<String> getSupportedFormats() {
+    return ['pdf', 'png', 'jpg', 'jpeg'];
+  }
 }

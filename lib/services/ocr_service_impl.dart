@@ -12,8 +12,6 @@ import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart
 import 'package:shared_preferences/shared_preferences.dart';
 import '../features/reader/book_notifier.dart';
 
-typedef ProgressCallback = void Function(String message, double? progress);
-
 class OcrServiceImpl implements OcrService {
   // Gemini model for cloud OCR (better for Persian/Arabic)
   late final GenerativeModel _geminiModel;
