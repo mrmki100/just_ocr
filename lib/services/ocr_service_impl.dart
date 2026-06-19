@@ -9,10 +9,11 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdfx/pdfx.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
-import 'package:just_ocr/features/reader/book_notifier.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class OcrServiceImpl implements OcrService {
+typedef ProgressCallback = void Function(String message, double? progress);
+
+class OcrServiceImpl {
   // Gemini model for cloud OCR (better for Persian/Arabic)
   late final GenerativeModel _geminiModel;
   final SharedPreferences _prefs;
@@ -173,7 +174,7 @@ class OcrServiceImpl implements OcrService {
     final content = [
       Content.multi([
         DataPart('image/jpeg', imageBytes),
-        const TextPart(
+        TextPart(
             'You are a high-fidelity Persian/Arabic OCR scanner. '
             'Extract ALL text from this image exactly as written. '
             'Preserve paragraph breaks and line structure. '
