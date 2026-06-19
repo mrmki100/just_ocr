@@ -1,16 +1,14 @@
 ```
 # Dependencies
-.dart_tool/
-.packages
 .pub/
-pubspec.lock
+.build/
+.dart_tool/
 
 # Logs and temp files
 *.log
 *.tmp
-*.swp
 
-# Environment variables
+# Environment
 .env
 .env.local
 *.env.*
@@ -18,6 +16,8 @@ pubspec.lock
 # Editors
 .vscode/
 .idea/
+*.swp
+*.swo
 
 # Build outputs
 build/

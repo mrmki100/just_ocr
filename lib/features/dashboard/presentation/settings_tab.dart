@@ -8,11 +8,13 @@
 // - Large toggle switches and buttons
 // - High contrast UI
 // - RTL support
+// - Dark mode support
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../services/auth/auth_service_impl.dart';
+import '../../../providers/theme_provider.dart';
 
 class SettingsTab extends ConsumerStatefulWidget {
   const SettingsTab({super.key});
@@ -224,11 +226,11 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
 
           const Divider(height: 32),
 
-          // Voice Selection
-          _buildSectionHeader(context, 'انتخاب صدا'),
-          _buildVoiceSelector(context),
+          // Appearance Section - Dark Mode Toggle
+          _buildSectionHeader(context, 'ظاهر'),
+          _buildThemeSelector(context),
 
-          const SizedBox(height: 32),
+          const Divider(height: 32),
 
           // About Section
           _buildSectionHeader(context, 'درباره برنامه'),
@@ -392,6 +394,65 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
               },
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildThemeSelector(BuildContext context) {
+    final themeMode = ref.watch(themeProvider);
+    final themeNotifier = ref.read(themeProvider.notifier);
+    
+    return Semantics(
+      label: 'انتخاب حالت تم',
+      child: Card(
+        elevation: 0,
+        color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'حالت تم:',
+                textDirection: TextDirection.rtl,
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
+              const SizedBox(height: 12),
+              SegmentedButton<ThemeMode>(
+                segments: const [
+                  ButtonSegment<ThemeMode>(
+                    value: ThemeMode.light,
+                    label: Text('روشن'),
+                    icon: Icon(Icons.light_mode),
+                  ),
+                  ButtonSegment<ThemeMode>(
+                    value: ThemeMode.dark,
+                    label: Text('تاریک'),
+                    icon: Icon(Icons.dark_mode),
+                  ),
+                  ButtonSegment<ThemeMode>(
+                    value: ThemeMode.system,
+                    label: Text('سیستم'),
+                    icon: Icon(Icons.settings_suggest),
+                  ),
+                ],
+                selected: {themeMode},
+                onSelectionChanged: (Set<ThemeMode> selected) {
+                  themeNotifier.setTheme(selected.first);
+                },
+                showSelectedIcon: false,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'تم فعلی: ${themeNotifier.themeName}',
+                textDirection: TextDirection.rtl,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+              ),
+            ],
+          ),
         ),
       ),
     );
