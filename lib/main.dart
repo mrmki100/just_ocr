@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:just_ocr/features/l10n/app_localizations.dart';
@@ -36,11 +35,11 @@ class MyApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final appLanguage = ref.watch(appLanguageProvider);
-    
+
     return MaterialApp(
       title: 'justOCR',
       debugShowCheckedModeBanner: false,
-      
+
       locale: appLanguage.locale,
       localizationsDelegates: const [
         AppLocalizations.delegate,
@@ -54,21 +53,21 @@ class MyApp extends ConsumerWidget {
         Locale('ar'),
         Locale('en'),
       ],
-      
+
       builder: (context, child) {
         return Directionality(
           textDirection: appLanguage.textDirection,
           child: child!,
         );
       },
-      
+
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.deepPurple,
           brightness: Brightness.light,
         ),
-        fontFamily: 'Vazirmatn', 
+        fontFamily: 'Vazirmatn',
         textTheme: const TextTheme(
           bodyLarge: TextStyle(fontSize: 18, height: 1.6),
           bodyMedium: TextStyle(fontSize: 16, height: 1.5),
@@ -82,10 +81,9 @@ class MyApp extends ConsumerWidget {
           surface: Colors.white,
         ),
       ),
-      
+
       home: const LanguageSelectionScreen(),
-      
-      // 2. This maps the button click to the actual Login Screen!
+
       routes: {
         '/login': (context) => const LoginScreen(),
       },

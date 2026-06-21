@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../l10n/app_language.dart';
-import '../../l10n/app_localizations.dart';
+import '../../../features/l10n/app_language.dart';
+import '../../../features/l10n/app_localizations.dart';
 
 /// Provider for the current app language
 final appLanguageProvider = StateNotifierProvider<AppLanguageNotifier, AppLanguage>(

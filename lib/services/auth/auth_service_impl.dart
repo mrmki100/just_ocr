@@ -17,8 +17,8 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'auth_service.dart';
-import '../../l10n/app_language.dart';
-import '../../l10n/app_localizations.dart';
+import '../../features/l10n/app_language.dart';
+import '../../features/l10n/app_localizations.dart';
 
 class AuthServiceImpl implements AuthService {
   final GoogleSignIn _googleSignIn = GoogleSignIn(

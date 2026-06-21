@@ -17,17 +17,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'library_screen.dart';
 import 'scan_tab.dart';
 import 'settings_tab.dart';
+import '../../../features/l10n/app_localizations.dart';
 
 enum DashboardTab {
-  books(Icons.library_books, 'کتاب‌ها', 'تب کتاب‌ها - لیست کتاب‌های اسکن شده'),
-  scan(Icons.document_scanner, 'اسکن', 'تب اسکن - اسکن سند جدید'),
-  settings(Icons.settings, 'تنظیمات', 'تب تنظیمات - پیکربندی برنامه');
+  books(Icons.library_books, 'booksTab', 'booksTab'),
+  scan(Icons.document_scanner, 'scanTab', 'scanTab'),
+  settings(Icons.settings, 'profileTab', 'settings');
 
   final IconData icon;
-  final String label;
-  final String semanticLabel;
+  final String labelKey;
+  final String semanticLabelKey;
 
-  const DashboardTab(this.icon, this.label, this.semanticLabel);
+  const DashboardTab(this.icon, this.labelKey, this.semanticLabelKey);
 }
 
 class MainDashboard extends ConsumerStatefulWidget {
@@ -62,12 +63,13 @@ class _MainDashboardState extends ConsumerState<MainDashboard> {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colors = theme.colorScheme;
+    final localizations = AppLocalizations.of(context);
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
           'justOCR',
-          textDirection: TextDirection.rtl,
+          textDirection: localizations.language.textDirection,
           style: theme.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.bold,
           ),
@@ -112,7 +114,7 @@ class _MainDashboardState extends ConsumerState<MainDashboard> {
               ),
               child: SafeArea(
                 child: Semantics(
-                  label: 'نوار ناوبری پایین',
+                  label: localizations.accessibilityLabel,
                   explicitChildNodes: true,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -122,6 +124,7 @@ class _MainDashboardState extends ConsumerState<MainDashboard> {
                         tab: DashboardTab.values[index],
                         isSelected: _currentIndex == index,
                         onTap: () => _onTabTapped(index),
+                        localizations: localizations,
                       ),
                     ),
                   ),
@@ -138,6 +141,7 @@ class _MainDashboardState extends ConsumerState<MainDashboard> {
     required DashboardTab tab,
     required bool isSelected,
     required VoidCallback onTap,
+    required AppLocalizations localizations,
   }) {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colors = theme.colorScheme;
@@ -146,7 +150,7 @@ class _MainDashboardState extends ConsumerState<MainDashboard> {
       child: Semantics(
         button: true,
         selected: isSelected,
-        label: tab.semanticLabel,
+        label: localizations.getString(tab.semanticLabelKey),
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(12),
@@ -176,8 +180,8 @@ class _MainDashboardState extends ConsumerState<MainDashboard> {
                 const SizedBox(height: 4),
                 // Label with proper text scaling
                 Text(
-                  tab.label,
-                  textDirection: TextDirection.rtl,
+                  localizations.getString(tab.labelKey),
+                  textDirection: localizations.language.textDirection,
                   style: theme.textTheme.labelSmall?.copyWith(
                     fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                     color: isSelected
