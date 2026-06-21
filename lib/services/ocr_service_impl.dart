@@ -1,6 +1,7 @@
 // lib/services/ocr_service_impl.dart
 // Consolidated OCR service supporting PDF, EPUB, and images
 // with proper progress reporting and error handling
+// Updated to support dynamic model selection based on user preference
 
 import 'dart:io';
 import 'dart:typed_data';
@@ -8,33 +9,49 @@ import 'package:flutter/foundation.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdfx/pdfx.dart';
-import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../features/reader/book_notifier.dart';
+import 'ocr/paddle_ocr_service.dart';
 
 class OcrServiceImpl implements OcrService {
   // Gemini model for cloud OCR (better for Persian/Arabic)
-  late final GenerativeModel _geminiModel;
+  late GenerativeModel _geminiModel;
   final SharedPreferences _prefs;
-  final String _modelName;
+  String _modelName;
   
-  // ML Kit for offline fallback
-  final TextRecognizer _mlKitRecognizer = 
-      TextRecognizer(script: TextRecognitionScript.latin);
+  // PaddleOCR for offline fallback (open-source, supports Persian/Arabic)
+  final PaddleOcrService _paddleOcrService = PaddleOcrService();
+  bool _isPaddleInitialized = false;
 
-  OcrServiceImpl(this._prefs, {String? modelName}) : _modelName = modelName ?? 'gemini-2.0-flash' {
+  OcrServiceImpl(this._prefs, {String? modelName}) : _modelName = modelName ?? 'paddle-ocr' {
+    _initializeModel();
+  }
+
+  void _initializeModel() {
     // API key will be retrieved from SharedPreferences at runtime
     final apiKey = _prefs.getString('gemini_api_key') ?? '';
     
-    if (apiKey.isEmpty) {
+    if (apiKey.isEmpty && !_modelName.startsWith('paddle')) {
       debugPrint('⚠️ WARNING: GEMINI_API_KEY not provided. Cloud OCR will fail.');
     }
     
-    _geminiModel = GenerativeModel(
-      model: _modelName,
-      apiKey: apiKey,
-    );
+    if (!_modelName.startsWith('paddle')) {
+      _geminiModel = GenerativeModel(
+        model: _modelName,
+        apiKey: apiKey,
+      );
+    }
   }
+
+  /// Update the model name and reinitialize the Gemini model
+  void updateModel(String modelName) {
+    _modelName = modelName;
+    _initializeModel();
+    debugPrint('[OcrServiceImpl] Model updated to: $_modelName');
+  }
+
+  /// Get the current model name
+  String get currentModelName => _modelName;
 
   @override
   Future<List<String>> extractPages(
@@ -116,10 +133,11 @@ class OcrServiceImpl implements OcrService {
           0.5 + (progress * 0.5), // Second 50% for OCR
         );
 
-        // Run OCR on the page image
+        // Run OCR on the page image based on selected model
+        final bool useGemini = !_modelName.startsWith('paddle');
         final String pageText = await _processImage(
           tempImageFile,
-          useGemini: true, // Prefer Gemini for better Persian support
+          useGemini: useGemini,
         );
 
         extractedPages.add(pageText.isNotEmpty ? pageText : '⚠️ متنی در صفحه $i یافت نشد');
@@ -151,20 +169,20 @@ class OcrServiceImpl implements OcrService {
     return ['پشتیبانی از فایل‌های EPUB در نسخه آینده اضافه خواهد شد.'];
   }
 
-  /// Process single image with OCR (Gemini preferred, ML Kit fallback)
+  /// Process single image with OCR (Gemini preferred, PaddleOCR fallback)
   Future<String> _processImage(File imageFile, {required bool useGemini}) async {
     // Try Gemini first for best Persian/Arabic accuracy
     if (useGemini) {
       try {
         return await _geminiOcr(imageFile);
       } catch (e) {
-        debugPrint('[OcrServiceImpl] Gemini failed, falling back to ML Kit: $e');
-        // Fall through to ML Kit
+        debugPrint('[OcrServiceImpl] Gemini failed, falling back to PaddleOCR: $e');
+        // Fall through to PaddleOCR
       }
     }
 
-    // Fallback to ML Kit (offline, but less accurate for Persian)
-    return await _mlKitOcr(imageFile);
+    // Fallback to PaddleOCR (offline, open-source, excellent Persian/Arabic support)
+    return await _paddleOcr(imageFile);
   }
 
   /// Cloud OCR using Gemini (best for Persian/Arabic)
@@ -193,25 +211,13 @@ class OcrServiceImpl implements OcrService {
     return text.trim();
   }
 
-  /// Offline OCR using ML Kit (fallback option)
-  Future<String> _mlKitOcr(File imageFile) async {
-    final InputImage inputImage = InputImage.fromFile(imageFile);
-    final RecognizedText recognizedText = 
-        await _mlKitRecognizer.processImage(inputImage);
-
-    final StringBuffer structuredText = StringBuffer();
+  /// Offline OCR using PaddleOCR (fallback option)
+  /// Open-source, supports Persian/Arabic, no API quota limits
+  Future<String> _paddleOcr(File imageFile) async {
+    final String? result = await _paddleOcrService.processImage(imageFile);
     
-    for (TextBlock block in recognizedText.blocks) {
-      for (TextLine line in block.lines) {
-        structuredText.writeln(line.text);
-      }
-      structuredText.writeln(); // Paragraph separator
-    }
-
-    final String result = structuredText.toString().trim();
-    
-    if (result.isEmpty) {
-      throw StateError('ML Kit found no text');
+    if (result == null || result.isEmpty) {
+      throw StateError('PaddleOCR found no text or failed to process image');
     }
     
     return result;
@@ -219,6 +225,6 @@ class OcrServiceImpl implements OcrService {
 
   /// Cleanup resources
   void dispose() {
-    _mlKitRecognizer.close();
+    _paddleOcrService.dispose();
   }
 }

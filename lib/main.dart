@@ -13,7 +13,7 @@ import 'package:just_ocr/services/file_import_service_impl.dart';
 import 'package:just_ocr/services/ocr_service_impl.dart';
 import 'package:just_ocr/features/reader/book_notifier.dart';
 import 'package:just_ocr/services/auth/auth_service_impl.dart';
-import 'package:just_ocr/features/dashboard/presentation/settings_tab.dart';
+import 'package:just_ocr/features/dashboard/presentation/settings_tab.dart'; // For selectedOcrModelProvider
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

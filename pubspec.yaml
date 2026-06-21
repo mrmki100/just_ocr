@@ -25,10 +25,12 @@ dependencies:
   shared_preferences: ^2.5.5
 
   # Document Parsing & OCR
-  google_mlkit_text_recognition: ^0.15.1
+  paddle_ocr_flutter: ^0.1.5 # High accuracy, open-source, supports Persian/Arabic
   google_generative_ai: ^0.4.6
   syncfusion_flutter_pdfviewer: ^33.2.12
   epub_view: ^3.2.0
+  
+  # Removed: google_mlkit_text_recognition
 
   # TTS & Audio
   flutter_tts: ^4.2.5
@@ -41,9 +43,10 @@ dependencies:
   uuid: ^4.5.3
   logger: ^2.7.0
   cupertino_icons: ^1.0.9
-  google_mlkit_commons: ^0.11.1
   pdfx: ^2.9.2
   file_selector: ^1.0.3
+  
+  # Removed: google_mlkit_commons
 
 dev_dependencies:
   flutter_test:

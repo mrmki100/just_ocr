@@ -30,25 +30,31 @@ class OcrModelsNotifier extends StateNotifier<AsyncValue<List<String>>> {
     _loadModels();
   }
 
-  final GeminiModelService _modelService = GeminiModelService();
-
   Future<void> _loadModels() async {
     state = const AsyncValue.loading();
     try {
       final prefs = await SharedPreferences.getInstance();
       final apiKey = prefs.getString('api_key');
       
+      // Always include PaddleOCR as it's open-source and doesn't need API key
+      final List<String> allModels = ['paddle-ocr'];
+      
       if (apiKey == null || apiKey.isEmpty) {
-        // No API key, return default list
-        state = AsyncValue.data(['gemini-2.5-flash', 'gemini-2.0-flash']);
+        // No API key, only show PaddleOCR
+        state = AsyncValue.data(allModels);
         return;
       }
 
-      final models = await _modelService.fetchAvailableModels(apiKey);
-      state = AsyncValue.data(models);
+      // Fetch Gemini models if API key is available
+      final geminiService = GeminiModelService();
+      final geminiModels = await geminiService.fetchAvailableModels(apiKey);
+      allModels.addAll(geminiModels);
+      
+      state = AsyncValue.data(allModels);
     } catch (e, st) {
       debugPrint('[OcrModelsNotifier] Error loading models: $e\n$st');
-      state = AsyncValue.error(e, st);
+      // Fallback to just PaddleOCR on error
+      state = const AsyncValue.data(['paddle-ocr']);
     }
   }
 
@@ -57,13 +63,14 @@ class OcrModelsNotifier extends StateNotifier<AsyncValue<List<String>>> {
   }
 }
 
+
 /// Provider for the currently selected OCR model
 final selectedOcrModelProvider = StateNotifierProvider<SelectedOcrModelNotifier, String>(
   (ref) => SelectedOcrModelNotifier(),
 );
 
 class SelectedOcrModelNotifier extends StateNotifier<String> {
-  SelectedOcrModelNotifier() : super('gemini-2.0-flash') {
+  SelectedOcrModelNotifier() : super('paddle-ocr') {
     _loadModel();
   }
 
@@ -72,6 +79,9 @@ class SelectedOcrModelNotifier extends StateNotifier<String> {
     final savedModel = prefs.getString('selected_ocr_model');
     if (savedModel != null && savedModel.isNotEmpty) {
       state = savedModel;
+    } else {
+      // Default to PaddleOCR for offline-first approach
+      state = 'paddle-ocr';
     }
   }
 
