@@ -27,14 +27,6 @@ final ocrModelsProvider = StateNotifierProvider<OcrModelsNotifier, AsyncValue<Li
 );
 
 class OcrModelsNotifier extends StateNotifier<AsyncValue<List<String>>> {
-  // Allowed Gemini models - ONLY these 4 specific models (no 1.5, no 2.0)
-  static const _allowedGeminiModels = [
-    'gemini-2.5-flash',
-    'gemini-2.5-flash-lite',
-    'gemini-3.1-flash',
-    'gemini-3.5-flash-lite',
-  ];
-
   OcrModelsNotifier() : super(const AsyncValue.loading()) {
     _loadModels();
   }
@@ -43,25 +35,20 @@ class OcrModelsNotifier extends StateNotifier<AsyncValue<List<String>>> {
     state = const AsyncValue.loading();
     try {
       final prefs = await SharedPreferences.getInstance();
-      // Use consistent key 'gemini_api_key' as stored by AuthServiceImpl
       final apiKey = prefs.getString('gemini_api_key');
 
-      // Always include PaddleOCR as it's open-source and doesn't need API key
       final List<String> allModels = ['paddle-ocr'];
 
       if (apiKey == null || apiKey.isEmpty) {
-        // No API key, only show PaddleOCR
         state = AsyncValue.data(allModels);
         return;
       }
 
-      // Fetch Gemini models if API key is available
       final geminiService = GeminiModelService();
       final fetchedModels = await geminiService.fetchAvailableModels(apiKey);
-      
-      // Filter to only include allowed models
+
       for (final model in fetchedModels) {
-        if (_allowedGeminiModels.contains(model)) {
+        if (GeminiModelService.allowedGeminiModels.contains(model)) {
           allModels.add(model);
         }
       }
@@ -69,8 +56,7 @@ class OcrModelsNotifier extends StateNotifier<AsyncValue<List<String>>> {
       state = AsyncValue.data(allModels);
     } catch (e, st) {
       debugPrint('[OcrModelsNotifier] Error loading models: $e\n$st');
-      // Fallback to PaddleOCR + allowed models list on error
-      state = AsyncValue.data(['paddle-ocr', ..._allowedGeminiModels]);
+      state = AsyncValue.data(['paddle-ocr', ...GeminiModelService.allowedGeminiModels]);
     }
   }
 
@@ -78,6 +64,7 @@ class OcrModelsNotifier extends StateNotifier<AsyncValue<List<String>>> {
     await _loadModels();
   }
 }
+
 
 
 /// Provider for the currently selected OCR model
