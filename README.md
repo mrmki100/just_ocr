@@ -11,7 +11,7 @@ Provide complete accessibility for users who cannot see the screen, with full Ta
 ### Core Functionality
 - **OCR Scanning**: Extract text from PDFs, images (JPG/PNG), and EPUB files
 - **Text-to-Speech**: Read extracted text aloud with adjustable speed
-- **Offline Support**: ML Kit OCR works without internet; Gemini fallback for better Persian accuracy
+- **Offline Support**: PaddleOCR OCR works without internet; Gemini fallback for better Persian accuracy
 - **Reading Position**: Automatically saves and restores your place
 
 ### Accessibility Features
@@ -44,7 +44,7 @@ lib/
 │       ├── book_state.dart            # State machine (sealed classes)
 │       └── book_notifier.dart         # Business logic
 ├── services/
-│   ├── ocr_service_impl.dart          # OCR pipeline (Gemini + ML Kit)
+│   ├── ocr_service_impl.dart          # OCR pipeline (Gemini + PaddleOCR)
 │   └── file_import_service_impl.dart  # File picker
 └── data/
     ├── models/                        # Isar database models
@@ -92,7 +92,7 @@ lib/
 |----------|-------------|----------|
 | `GEMINI_API_KEY` | Google Gemini API key for cloud OCR | No* |
 
-*Without API key, app falls back to ML Kit (offline, less accurate for Persian)
+*Without API key, app falls back to PaddleOCR (offline, less accurate for Persian)
 
 ### Android Permissions
 
@@ -216,7 +216,7 @@ Built with:
 - Flutter & Dart
 - Riverpod (state management)
 - Google Gemini AI (cloud OCR)
-- ML Kit (offline OCR)
+- PaddleOCR (offline OCR)
 - Isar (local database)
 - flutter_tts (text-to-speech)
 

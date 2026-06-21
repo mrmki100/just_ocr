@@ -104,7 +104,7 @@ lib/
 │   ├── library/
 │   │   ├── library_service.dart       # Abstract library interface
 │   │   └── library_service_impl.dart  # Isar implementation
-│   ├── ocr_service_impl.dart          # OCR with Gemini + ML Kit
+│   ├── ocr_service_impl.dart          # OCR with Gemini + PaddleOCR
 │   └── file_import_service_impl.dart  # File picker implementation
 ├── data/
 │   ├── models/
@@ -230,7 +230,7 @@ uuid: ^4.3.3               # Unique ID generation
 
 ## 🔥 Production Ready Features
 
-1. **Offline-First**: Works without internet (ML Kit fallback)
+1. **Offline-First**: Works without internet (PaddleOCR fallback)
 2. **Progress Reporting**: Real-time OCR progress with screen reader announcements
 3. **Resume Support**: Remembers reading position across app restarts
 4. **Error Recovery**: Graceful error handling with retry options

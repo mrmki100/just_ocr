@@ -29,7 +29,7 @@ This is a well-architected Flutter application designed for visually impaired us
 
 ### 4. Technical Choices
 - **Multi-format support**: PDF, EPUB, Images
-- **Dual OCR engines**: ML Kit + Gemini for flexibility
+- **Dual OCR engines**: PaddleOCR + Gemini for flexibility
 - **User-provided API keys**: Smart quota management approach
 - **TTS integration**: Native speech synthesis
 

@@ -5,7 +5,7 @@ import '../logging/event_logger.dart';
 
 class PaddleOcrService {
   final EventLogger _logger = EventLogger();
-  late final PaddleOCRFlutter _paddleOCR;
+  late final PaddleOCR _paddleOCR;
   bool _isInitialized = false;
 
   /// Initialize PaddleOCR with Persian/Arabic support
@@ -20,7 +20,7 @@ class PaddleOcrService {
         message: 'Initializing PaddleOCR engine...',
       );
 
-      _paddleOCR = PaddleOCRFlutter();
+      _paddleOCR = PaddleOCR();
       
       // Initialize with models that support Persian/Arabic
       // PaddleOCR PP-OCRv4 has excellent multilingual support
@@ -95,11 +95,11 @@ class PaddleOcrService {
 
       for (var result in results) {
         // Get approximate Y position from bounding box
-        // PaddleOCRFlutter returns List<List<double>> for bbox
-        final bbox = result.bbox;
-        if (bbox.isEmpty || bbox[0].length < 2) continue;
+        // PaddleOCR returns 'points' as List<List<double>> for bounding box
+        final points = result.points;
+        if (points.isEmpty || points[0].length < 2) continue;
         
-        final yPosition = ((bbox[0][1] + bbox[2][1]) / 2).round();
+        final yPosition = ((points[0][1] + points[2][1]) / 2).round();
         
         // Group text blocks that are on the same line (within 10 pixels)
         int groupedY = (yPosition / 10).round() * 10;
