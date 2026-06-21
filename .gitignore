@@ -1,53 +1,39 @@
-# Compiled and build artifacts
-*.pyc
-__pycache__/
-*.o
-*.obj
-*.class
-*.exe
-*.dll
-*.so
-*.a
-*.out
-
 # Dependencies
-node_modules/
-venv/
-.venv/
-.env
-.env.local
-.env.*
-
+.dart_tool/
+.build/
 # Logs and temp files
 *.log
 *.tmp
 *.swp
-*.swo
-
+# Environment
+.env
+.env.local
+.env.*
 # Editors
 .vscode/
 .idea/
-
-# Coverage reports
+# Coverage
 coverage/
 htmlcov/
 .coverage
-
-# Build outputs
+# Distribution
 dist/
 build/
-target/
-.gradle/
-
-# Python cache
+# Cache
 .mypy_cache/
 .pytest_cache/
-
-# System files
-.DS_Store
-Thumbs.db
-
-# Compressed files
+.gradle/
+target/
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+venv/
+.venv/
+# Node
+node_modules/
+# Compressed
 *.zip
 *.gz
 *.tar

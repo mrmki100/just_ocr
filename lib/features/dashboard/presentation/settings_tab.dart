@@ -528,6 +528,9 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
   }
 
   Widget _buildAccountCard(BuildContext context) {
+    final localizations = _createLocalizations();
+    final isRTL = localizations.language.textDirection == TextDirection.rtl;
+    
     return Card(
       elevation: 0,
       color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5),
@@ -557,14 +560,14 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                       children: [
                         Text(
                           _userEmail ?? '',
-                          textDirection: TextDirection.rtl,
+                          textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
                         Text(
                           _apiKey != null && _apiKey!.isNotEmpty
-                              ? 'کلید API: تنظیم شده ✓'
-                              : 'کلید API: تنظیم نشده ⚠️',
-                          textDirection: TextDirection.rtl,
+                              ? '${localizations.apiKey}: ${localizations.configured} ✓'
+                              : '${localizations.apiKey}: ${localizations.notConfigured} ⚠️',
+                          textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                 color: _apiKey != null && _apiKey!.isNotEmpty
                                     ? Colors.green
