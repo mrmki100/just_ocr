@@ -1,24 +1,30 @@
 ```
-# Flutter/Dart specific
-.dart_tool/
-.build/
-bin/cache/
+# Build artifacts
+*.apk
+*.aar
+*.jar
+*.class
+build/
+app/build/
 
 # Dependencies
-.pub/
-pubspec.lock
+node_modules/
+.libs/
+vendor/
 
 # Logs
 *.log
-**/logs
 
-# Environment variables
+# Environment
 .env
 .env.local
-*.env.*
+*.env
 
 # IDE files
 .idea/
+*.iml
+*.ipr
+*.iws
 .vscode/
 *.swp
 *.swo
@@ -27,11 +33,28 @@ pubspec.lock
 .DS_Store
 Thumbs.db
 
-# Coverage
+# Coverage reports
 coverage/
-*.lcov
+htmlcov/
+*.coverage
+
+# Python specific
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg-info/
+.eggs/
+dist/
+*.egg
+
+# Gradle
+.gradle/
+!gradle/wrapper/gradle-wrapper.jar
 
 # Temporary files
 *.tmp
-*.temp
+*~
 ```
