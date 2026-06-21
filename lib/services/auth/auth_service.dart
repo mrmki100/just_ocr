@@ -14,4 +14,10 @@ abstract class AuthService {
   /// Shows the API key setup dialog after login
   /// Returns the API key if user successfully entered it, null otherwise
   Future<String?> showApiKeySetupDialog(BuildContext context);
+  
+  /// Get the current app language code from preferences
+  Future<String?> getCurrentLanguageCode();
+  
+  /// Save the app language code to preferences
+  Future<void> saveLanguageCode(String languageCode);
 }
