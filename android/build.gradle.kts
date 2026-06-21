@@ -56,7 +56,7 @@ subprojects {
     val forceUpgrade: Project.() -> Unit = {
         plugins.withId("com.android.library") {
             extensions.configure<com.android.build.api.dsl.LibraryExtension> {
-                compileSdk = 34
+                compileSdk = 36
                 
                 // ONLY fix Isar, leave file_picker alone!
                 if (project.name == "isar_flutter_libs" && namespace == null) {
@@ -66,7 +66,7 @@ subprojects {
         }
         plugins.withId("com.android.application") {
             extensions.configure<com.android.build.api.dsl.ApplicationExtension> {
-                compileSdk = 34
+                compileSdk = 36
             }
         }
     }
