@@ -95,11 +95,12 @@ class PaddleOcrService {
 
       for (var result in results) {
         // Get approximate Y position from bounding box
-        // PaddleOCR returns 'points' as List<List<double>> for bounding box
+        // PaddleOCR returns 'points' as List<OcrPoint> for bounding box
         final points = result.points;
-        if (points.isEmpty || points[0].length < 2) continue;
+        if (points.isEmpty) continue;
         
-        final yPosition = ((points[0][1] + points[2][1]) / 2).round();
+        // OcrPoint has x and y properties directly
+        final yPosition = ((points[0].y + points[2].y) / 2).round();
         
         // Group text blocks that are on the same line (within 10 pixels)
         int groupedY = (yPosition / 10).round() * 10;
