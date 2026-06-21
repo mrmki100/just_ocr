@@ -13,6 +13,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../core/constants/app_constants.dart';
 import '../../../services/auth/auth_service_impl.dart';
 import '../../../providers/theme_provider.dart';
 import '../../l10n/app_localizations.dart';
@@ -26,6 +27,14 @@ final ocrModelsProvider = StateNotifierProvider<OcrModelsNotifier, AsyncValue<Li
 );
 
 class OcrModelsNotifier extends StateNotifier<AsyncValue<List<String>>> {
+  // Allowed Gemini models - ONLY these 4 specific models (no 1.5, no 2.0)
+  static const _allowedGeminiModels = [
+    'gemini-2.5-flash',
+    'gemini-2.5-flash-lite',
+    'gemini-3.1-flash',
+    'gemini-3.5-flash-lite',
+  ];
+
   OcrModelsNotifier() : super(const AsyncValue.loading()) {
     _loadModels();
   }
@@ -34,11 +43,12 @@ class OcrModelsNotifier extends StateNotifier<AsyncValue<List<String>>> {
     state = const AsyncValue.loading();
     try {
       final prefs = await SharedPreferences.getInstance();
-      final apiKey = prefs.getString('api_key');
-      
+      // Use consistent key 'gemini_api_key' as stored by AuthServiceImpl
+      final apiKey = prefs.getString('gemini_api_key');
+
       // Always include PaddleOCR as it's open-source and doesn't need API key
       final List<String> allModels = ['paddle-ocr'];
-      
+
       if (apiKey == null || apiKey.isEmpty) {
         // No API key, only show PaddleOCR
         state = AsyncValue.data(allModels);
@@ -47,14 +57,20 @@ class OcrModelsNotifier extends StateNotifier<AsyncValue<List<String>>> {
 
       // Fetch Gemini models if API key is available
       final geminiService = GeminiModelService();
-      final geminiModels = await geminiService.fetchAvailableModels(apiKey);
-      allModels.addAll(geminiModels);
+      final fetchedModels = await geminiService.fetchAvailableModels(apiKey);
       
+      // Filter to only include allowed models
+      for (final model in fetchedModels) {
+        if (_allowedGeminiModels.contains(model)) {
+          allModels.add(model);
+        }
+      }
+
       state = AsyncValue.data(allModels);
     } catch (e, st) {
       debugPrint('[OcrModelsNotifier] Error loading models: $e\n$st');
-      // Fallback to just PaddleOCR on error
-      state = const AsyncValue.data(['paddle-ocr']);
+      // Fallback to PaddleOCR + allowed models list on error
+      state = AsyncValue.data(['paddle-ocr', ..._allowedGeminiModels]);
     }
   }
 
@@ -70,7 +86,7 @@ final selectedOcrModelProvider = StateNotifierProvider<SelectedOcrModelNotifier,
 );
 
 class SelectedOcrModelNotifier extends StateNotifier<String> {
-  SelectedOcrModelNotifier() : super('paddle-ocr') {
+  SelectedOcrModelNotifier() : super(AppConstants.defaultOcrModel) {
     _loadModel();
   }
 
@@ -80,8 +96,8 @@ class SelectedOcrModelNotifier extends StateNotifier<String> {
     if (savedModel != null && savedModel.isNotEmpty) {
       state = savedModel;
     } else {
-      // Default to PaddleOCR for offline-first approach
-      state = 'paddle-ocr';
+      // Default to Gemini 2.5 Flash for best accuracy
+      state = AppConstants.defaultOcrModel;
     }
   }
 
