@@ -20,4 +20,10 @@ abstract class AuthService {
   
   /// Save the app language code to preferences
   Future<void> saveLanguageCode(String languageCode);
+  
+  /// Get the selected OCR model name from preferences
+  Future<String?> getSelectedOcrModel();
+  
+  /// Save the selected OCR model name to preferences
+  Future<void> saveSelectedOcrModel(String modelName);
 }

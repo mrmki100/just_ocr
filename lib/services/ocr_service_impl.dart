@@ -16,12 +16,13 @@ class OcrServiceImpl implements OcrService {
   // Gemini model for cloud OCR (better for Persian/Arabic)
   late final GenerativeModel _geminiModel;
   final SharedPreferences _prefs;
+  final String _modelName;
   
   // ML Kit for offline fallback
   final TextRecognizer _mlKitRecognizer = 
       TextRecognizer(script: TextRecognitionScript.latin);
 
-  OcrServiceImpl(this._prefs) {
+  OcrServiceImpl(this._prefs, {String? modelName}) : _modelName = modelName ?? 'gemini-2.0-flash' {
     // API key will be retrieved from SharedPreferences at runtime
     final apiKey = _prefs.getString('gemini_api_key') ?? '';
     
@@ -30,7 +31,7 @@ class OcrServiceImpl implements OcrService {
     }
     
     _geminiModel = GenerativeModel(
-      model: 'gemini-2.0-flash',
+      model: _modelName,
       apiKey: apiKey,
     );
   }

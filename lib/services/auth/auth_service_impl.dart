@@ -365,4 +365,17 @@ class AuthServiceImpl implements AuthService {
     await prefs.setString('app_language_code', languageCode);
     debugPrint('[AuthService] Language code saved: $languageCode');
   }
+
+  @override
+  Future<String?> getSelectedOcrModel() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('selected_ocr_model');
+  }
+
+  @override
+  Future<void> saveSelectedOcrModel(String modelName) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('selected_ocr_model', modelName);
+    debugPrint('[AuthService] OCR model saved: $modelName');
+  }
 }
