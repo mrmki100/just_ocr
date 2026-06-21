@@ -251,6 +251,12 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
 
           const Divider(height: 32),
 
+          // OCR Model Selection Section
+          _buildSectionHeader(context, 'مدل OCR'),
+          _buildOcrModelSelector(context),
+
+          const Divider(height: 32),
+
           // Appearance Section - Dark Mode Toggle
           _buildSectionHeader(context, localizations.settings),
           _buildThemeSelector(context),
