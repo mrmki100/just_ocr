@@ -335,4 +335,17 @@ class AuthServiceImpl implements AuthService {
       return TextDirection.ltr;
     }
   }
+
+  @override
+  Future<String?> getCurrentLanguageCode() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('app_language_code');
+  }
+
+  @override
+  Future<void> saveLanguageCode(String languageCode) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('app_language_code', languageCode);
+    debugPrint('[AuthService] Language code saved: $languageCode');
+  }
 }

@@ -55,6 +55,7 @@ class AppLocalizations {
   String get setupApiKey => _getString('setupApiKey');
   String get signOut => _getString('signOut');
   String get apiKeySaved => _getString('apiKeySaved');
+  String get loginRequired => _getString('loginRequired');
 
   // Navigation Tabs
   String get booksTab => _getString('booksTab');
@@ -166,6 +167,7 @@ class AppLocalizations {
     'setupApiKey': 'تنظیم کلید API',
     'signOut': 'خروج',
     'apiKeySaved': 'کلید API ذخیره شد',
+    'loginRequired': 'برای استفاده از اسکن ابری، باید وارد حساب گوگل خود شوید.',
     'booksTab': 'کتاب‌ها',
     'scanTab': 'اسکن',
     'profileTab': 'پروفایل',
@@ -251,6 +253,7 @@ class AppLocalizations {
     'setupApiKey': 'API-sleutel instellen',
     'signOut': 'Uitloggen',
     'apiKeySaved': 'API-sleutel opgeslagen',
+    'loginRequired': 'Om cloudscanning te gebruiken, moet u ingelogd zijn met uw Google-account.',
     'booksTab': 'Boeken',
     'scanTab': 'Scannen',
     'profileTab': 'Profiel',
@@ -336,6 +339,7 @@ class AppLocalizations {
     'setupApiKey': 'إعداد مفتاح API',
     'signOut': 'تسجيل الخروج',
     'apiKeySaved': 'تم حفظ مفتاح API',
+    'loginRequired': 'لاستخدام المسح السحابي، يجب أن تكون مسجل الدخول بحساب Google الخاص بك.',
     'booksTab': 'الكتب',
     'scanTab': 'مسح',
     'profileTab': 'الملف الشخصي',
@@ -421,6 +425,7 @@ class AppLocalizations {
     'setupApiKey': 'Set up API Key',
     'signOut': 'Sign out',
     'apiKeySaved': 'API key saved',
+    'loginRequired': 'To use cloud scanning, you must be signed in to your Google account.',
     'booksTab': 'Books',
     'scanTab': 'Scan',
     'profileTab': 'Profile',

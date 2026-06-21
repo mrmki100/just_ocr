@@ -584,7 +584,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                     child: ElevatedButton.icon(
                       onPressed: _handleSetupApiKey,
                       icon: const Icon(Icons.key),
-                      label: const Text('تنظیم کلید API'),
+                      label: Text(localizations.setupApiKey),
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 12),
                       ),
@@ -596,7 +596,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                     child: OutlinedButton.icon(
                       onPressed: _handleSignOut,
                       icon: const Icon(Icons.logout),
-                      label: const Text('خروج'),
+                      label: Text(localizations.signOut),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         foregroundColor: Colors.red,
@@ -608,7 +608,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
             ] else ...[
               // Not logged in state
               Text(
-                localizations.getString('loginRequired') ?? 'برای استفاده از اسکن ابری، باید وارد حساب گوگل خود شوید.',
+                localizations.loginRequired,
                 textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
                 style: Theme.of(context).textTheme.bodyMedium,
               ),

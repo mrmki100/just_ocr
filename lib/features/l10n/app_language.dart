@@ -12,6 +12,22 @@ enum AppLanguage {
 
   const AppLanguage(this.code, this.nativeName);
 
+  /// Get language from code string
+  static AppLanguage fromCode(String code) {
+    switch (code.toLowerCase()) {
+      case 'fa':
+        return AppLanguage.persian;
+      case 'nl':
+        return AppLanguage.dutch;
+      case 'ar':
+        return AppLanguage.arabic;
+      case 'en':
+        return AppLanguage.english;
+      default:
+        return AppLanguage.persian; // Default fallback
+    }
+  }
+
   Locale get locale {
     switch (this) {
       case AppLanguage.persian:
