@@ -1,35 +1,98 @@
 ```
-# Build artifacts
-*.dart_tool/
-*.build/
-*.dist/
-
 # Dependencies
-pubspec.lock
+.pub/
+.buildlog
+.flutter-plugins
+.flutter-plugin-dependencies
+.packages
 
-# Logs and temp files
+# Generated plugin build files
+flutter/ephemeral/.plugin_symlinks/
+
+# Coverage
+coverage/
+
+# Log files
 *.log
-*.tmp
 
-# Environment variables
+# Environment
 .env
 .env.local
-*.env.*
+.env.*
 
 # IDE files
 .idea/
 .vscode/
 *.swp
 *.swo
+*.tmp
 
-# OS files
+# OS generated files
 .DS_Store
 Thumbs.db
 
-# Coverage
-coverage/
-htmlcov/
+# Build artifacts
+build/
+dist/
+target/
+*.jar
+*.war
+*.class
+*.o
+*.obj
+*.out
+*.exe
+*.dll
+*.so
+*.a
+
+# Python specific
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+.ENV
+.pipenv
+.pytest_cache/
+.mypy_cache/
 .coverage
+
+# Node specific
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Ruby specific
+*.gem
+*.rbc
+.bundle/
+.config/
+vendor/bundle/
+vendor/cache/
+vendor/gems/
+vendor/ruby/
+
+# Java specific
+*.class
+*.jar
+*.war
+*.ear
+*.tar.gz
+hs_err_pid*
+
+# C/C++ specific
+*.o
+*.a
+*.so
+*.dll
+*.dylib
+*.exe
+*.out
 
 # Compressed files
 *.zip
@@ -54,4 +117,65 @@ htmlcov/
 *.tar.bz2
 *.tar.xz
 *.tar.zst
+
+# Flutter/Dart specific
+.dart_tool/
+.packages
+pubspec.lock
+*.g.dart
+*.freezed.dart
+*.config.dart
+*.gen.dart
+*.gr.dart
+*.gform.dart
+*.graphql.dart
+*.gql.dart
+*.graphql.schema.dart
+*.graphql.gql.dart
+*.graphql.ast.dart
+*.graphql.variables.dart
+*.graphql.data.dart
+*.graphql.reqres.dart
+*.graphql.response.dart
+*.graphql.fragment.dart
+*.graphql.mutation.dart
+*.graphql.query.dart
+*.graphql.subscription.dart
+*.graphql.selection_set.dart
+*.graphql.field.dart
+*.graphql.argument.dart
+*.graphql.directive.dart
+*.graphql.enum_value.dart
+*.graphql.input_object_field.dart
+*.graphql.scalar.dart
+*.graphql.union.dart
+*.graphql.interface.dart
+*.graphql.object_type.dart
+*.graphql.input_object_type.dart
+*.graphql.enum_type.dart
+*.graphql.directive_definition.dart
+*.graphql.schema_definition.dart
+*.graphql.type_definition.dart
+*.graphql.field_definition.dart
+*.graphql.input_value_definition.dart
+*.graphql.enum_value_definition.dart
+*.graphql.directive_location.dart
+*.graphql.operation_type.dart
+*.graphql.selection.dart
+*.graphql.inline_fragment.dart
+*.graphql.fragment_spread.dart
+*.graphql.variable_definition.dart
+*.graphql.operation_definition.dart
+*.graphql.selection_set_definition.dart
+*.graphql.field_definition.dart
+*.graphql.input_value_definition.dart
+*.graphql.enum_value_definition.dart
+*.graphql.directive_location.dart
+*.graphql.operation_type.dart
+*.graphql.selection.dart
+*.graphql.inline_fragment.dart
+*.graphql.fragment_spread.dart
+*.graphql.variable_definition.dart
+*.graphql.operation_definition.dart
+*.graphql.selection_set_definition.dart
 ```

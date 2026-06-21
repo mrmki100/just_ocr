@@ -9,7 +9,7 @@ class GeminiModelService {
   static const String _baseUrl = 'https://generativelanguage.googleapis.com/v1beta';
 
   /// Fetches the list of available models from Google API.
-  /// Returns a list of model IDs (e.g., 'gemini-2.5-flash', 'gemini-2.0-flash').
+  /// Returns a list of model IDs filtered to only allowed models (gemini-2.5-flash, gemini-2.5-flash-lite, gemini-3.1-flash, gemini-3.5-flash-lite).
   Future<List<String>> fetchAvailableModels(String apiKey) async {
     try {
       final url = Uri.parse('$_baseUrl/models?key=$apiKey');
@@ -23,8 +23,7 @@ class GeminiModelService {
         final data = json.decode(response.body);
         final List<dynamic> models = data['models'] ?? [];
 
-        // Filter for ALL generative models that support generateContent
-        // This ensures we get gemini-2.5-flash, gemini-2.0-flash, etc.
+        // Filter for allowed Gemini models that support generateContent
         final availableIds = <String>[];
         
         for (var model in models) {
@@ -33,32 +32,28 @@ class GeminiModelService {
           
           if (name == null) continue;
           
-          // Extract model ID from full name (e.g., "models/gemini-2.0-flash" -> "gemini-2.0-flash")
+          // Extract model ID from full name (e.g., "models/gemini-2.5-flash" -> "gemini-2.5-flash")
           final modelId = name.contains('/') ? name.split('/').last : name;
           
-          // Only include models that support generateContent (required for OCR)
-          // and are Gemini models (exclude tuning models, etc.)
+          // Only include models that:
+          // 1. Support generateContent (required for OCR)
+          // 2. Are in the allowed list (excludes gemini-1.x and gemini-2.0)
+          // 3. Start with "gemini"
           if (supportedMethods != null && 
               supportedMethods.contains('generateContent') &&
-              modelId.startsWith('gemini')) {
+              allowedGeminiModels.contains(modelId)) {
             availableIds.add(modelId);
           }
         }
 
         if (availableIds.isEmpty) {
-          // Fallback: return all model names if filtering failed
-          final allModelIds = models
-              .where((m) => m['name'] != null)
-              .map((m) {
-                final name = m['name'] as String;
-                return name.contains('/') ? name.split('/').last : name;
-              })
-              .toList();
-          if (allModelIds.isNotEmpty) return allModelIds;
+          // Fallback: return allowed models that user's API key might have access to
+          final fallbackModels = allowedGeminiModels.where((m) => m.startsWith('gemini')).toList();
+          if (fallbackModels.isNotEmpty) return fallbackModels;
         }
 
         // Sort: prefer newer versions (descending order by version number)
-        // e.g., gemini-2.5-flash > gemini-2.0-flash > gemini-1.5-flash
+        // e.g., gemini-3.5-flash-lite > gemini-3.1-flash > gemini-2.5-flash
         availableIds.sort((a, b) {
           // Extract version numbers for comparison
           final aVersion = RegExp(r'(\d+)\.(\d+)').firstMatch(a);
@@ -107,4 +102,12 @@ class GeminiModelService {
       (m) => m.group(0)!.toUpperCase(),
     );
   }
+
+  /// Returns the list of allowed Gemini model IDs (excludes gemini-1.x and gemini-2.0)
+  static const List<String> allowedGeminiModels = [
+    'gemini-2.5-flash',
+    'gemini-2.5-flash-lite',
+    'gemini-3.1-flash',
+    'gemini-3.5-flash-lite',
+  ];
 }
