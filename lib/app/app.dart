@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'router.dart';
-import '../providers/theme_provider.dart';
 import '../features/l10n/app_localizations.dart';
+import '../features/l10n/app_language.dart';
+import '../providers/theme_provider.dart';
 import '../features/language/presentation/language_selection_screen.dart';
 
 class JustOcrApp extends ConsumerWidget {

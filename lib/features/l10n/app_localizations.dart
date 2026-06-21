@@ -114,6 +114,8 @@ class AppLocalizations {
   String get pageLoaded => _getString('pageLoaded');
   String get documentReady => _getString('documentReady');
 
+  String getString(String key) => _getString(key);
+
   String _getString(String key) {
     switch (language) {
       case AppLanguage.persian:
