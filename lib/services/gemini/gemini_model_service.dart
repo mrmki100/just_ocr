@@ -97,9 +97,10 @@ class GeminiModelService {
   /// Gets a human-readable name for the model ID.
   String getDisplayName(String modelId) {
     if (modelId == 'paddle-ocr') return 'PaddleOCR Mobile (Offline, Open-Source)';
-    if (modelId.contains('2.5')) return 'Gemini 2.5 Flash (Fastest & Most Accurate)';
-    if (modelId.contains('2.0')) return 'Gemini 2.0 Flash (Stable)';
-    if (modelId.contains('1.5')) return 'Gemini 1.5 Flash (Legacy)';
+    if (modelId == 'gemini-2.5-flash') return 'Gemini 2.5 Flash (Recommended - Fast & Accurate)';
+    if (modelId == 'gemini-2.5-flash-lite') return 'Gemini 2.5 Flash Lite (Lightweight)';
+    if (modelId == 'gemini-3.1-flash') return 'Gemini 3.1 Flash (Latest Version)';
+    if (modelId == 'gemini-3.5-flash-lite') return 'Gemini 3.5 Flash Lite (Optimized)';
     // Capitalize first letter and replace dashes
     return modelId.replaceAll('-', ' ').replaceAllMapped(
       RegExp(r'\b\w'),

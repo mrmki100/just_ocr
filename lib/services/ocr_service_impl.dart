@@ -2,6 +2,7 @@
 // Consolidated OCR service supporting PDF, EPUB, and images
 // with proper progress reporting and error handling
 // Updated to support dynamic model selection based on user preference
+// Rate-limited to 1 request per 10 seconds to respect Gemini API RPM limits
 
 import 'dart:io';
 import 'dart:typed_data';
@@ -10,6 +11,7 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdfx/pdfx.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../core/constants/app_constants.dart';
 import '../features/reader/book_notifier.dart';
 import 'ocr/paddle_ocr_service.dart';
 
@@ -22,6 +24,10 @@ class OcrServiceImpl implements OcrService {
   // PaddleOCR for offline fallback (open-source, supports Persian/Arabic)
   final PaddleOcrService _paddleOcrService = PaddleOcrService();
   bool _isPaddleInitialized = false;
+  
+  // Rate limiting: track last request time to enforce 10-second interval
+  DateTime? _lastRequestTime;
+  final Duration _requestInterval = AppConstants.geminiRequestInterval;
 
   OcrServiceImpl(this._prefs, {String? modelName}) : _modelName = modelName ?? 'paddle-ocr' {
     _initializeModel();
@@ -52,6 +58,19 @@ class OcrServiceImpl implements OcrService {
 
   /// Get the current model name
   String get currentModelName => _modelName;
+
+  /// Enforce rate limiting by waiting until 10 seconds have passed since last request
+  Future<void> _enforceRateLimit() async {
+    if (_lastRequestTime != null) {
+      final elapsed = DateTime.now().difference(_lastRequestTime!);
+      if (elapsed < _requestInterval) {
+        final remaining = _requestInterval - elapsed;
+        debugPrint('[OcrServiceImpl] Rate limit: waiting ${remaining.inSeconds}s before next request');
+        await Future.delayed(remaining);
+      }
+    }
+    _lastRequestTime = DateTime.now();
+  }
 
   @override
   Future<List<String>> extractPages(
@@ -85,6 +104,7 @@ class OcrServiceImpl implements OcrService {
   }
 
   /// Process PDF by rendering each page as image and running OCR
+  /// Rate-limited to 1 request per 10 seconds to respect Gemini API RPM limits (5-10 RPM)
   Future<List<String>> _processPdf(
     File file,
     ProgressCallback onProgress,
@@ -134,6 +154,7 @@ class OcrServiceImpl implements OcrService {
         );
 
         // Run OCR on the page image based on selected model
+        // Each page is rate-limited to 10 seconds between requests
         final bool useGemini = !_modelName.startsWith('paddle');
         final String pageText = await _processImage(
           tempImageFile,
@@ -170,6 +191,7 @@ class OcrServiceImpl implements OcrService {
   }
 
   /// Process single image with OCR (Gemini preferred, PaddleOCR fallback)
+  /// Rate-limited to 1 request per 10 seconds for Gemini API calls
   Future<String> _processImage(File imageFile, {required bool useGemini}) async {
     // Try Gemini first for best Persian/Arabic accuracy
     if (useGemini) {
@@ -186,7 +208,13 @@ class OcrServiceImpl implements OcrService {
   }
 
   /// Cloud OCR using Gemini (best for Persian/Arabic)
+  /// Enforces strict 10-second rate limiting between each API request
+  /// to stay within RPM limits (5-10 requests per minute depending on model)
   Future<String> _geminiOcr(File imageFile) async {
+    // Enforce rate limiting before making the API call
+    // This ensures we never exceed 6 requests per minute (10s interval)
+    await _enforceRateLimit();
+    
     final Uint8List imageBytes = await imageFile.readAsBytes();
     
     final content = [
