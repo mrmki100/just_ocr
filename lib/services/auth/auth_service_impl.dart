@@ -188,7 +188,7 @@ class AuthServiceImpl implements AuthService {
                   controller: _controller,
                   decoration: InputDecoration(
                     labelText: loc.pasteApiKey,
-                    hintText: 'AIzaSy...',
+                    hintText: 'e.g., AIzaSy... or AQ.A...',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -233,12 +233,29 @@ class AuthServiceImpl implements AuthService {
                   return;
                 }
                 
-                // Basic validation: API keys start with "AIza"
-                if (!apiKey.startsWith('AIza')) {
+                // Flexible validation: Allow new Google API key formats (e.g., AQ.A..., AIza...)
+                // Only check for valid characters and reasonable length
+                // Let Google's servers validate the actual key
+                final validCharsRegex = RegExp(r'^[a-zA-Z0-9._-]+$');
+                
+                if (!validCharsRegex.hasMatch(apiKey)) {
                   ScaffoldMessenger.of(dialogContext).showSnackBar(
                     SnackBar(
                       content: Text(
-                        'کلید API نامعتبر است. باید با AIza شروع شود.',
+                        'کلید API حاوی کاراکترهای نامعتبر است. لطفاً کلید را دقیقاً کپی کنید.',
+                        textDirection: TextDirection.rtl,
+                      ),
+                      backgroundColor: Colors.orange,
+                    ),
+                  );
+                  return;
+                }
+                
+                if (apiKey.length < 20 || apiKey.length > 100) {
+                  ScaffoldMessenger.of(dialogContext).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'طول کلید API نامعتبر به نظر می‌رسد. لطفاً بررسی کنید.',
                         textDirection: TextDirection.rtl,
                       ),
                       backgroundColor: Colors.orange,
