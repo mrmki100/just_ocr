@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "176995673057",
-    "project_id": "justcr-305b5",
-    "storage_bucket": "justcr-305b5.firebasestorage.app"
+    "project_number": "657705310632",
+    "project_id": "justcr-64ab5",
+    "storage_bucket": "justcr-64ab5.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:176995673057:android:ae7de7787704ba238968a0",
+        "mobilesdk_app_id": "1:657705310632:android:119d9eacba39fc0d1e259d",
         "android_client_info": {
           "package_name": "com.readme.justcr"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyCb8gSE4p8hjhoyX_OX8xoTm9gzcOZh7wU"
+          "current_key": "AIzaSyCLec5eJKIiwJqCasPjFe5RjQzhKKDOBGg"
         }
       ],
       "services": {
