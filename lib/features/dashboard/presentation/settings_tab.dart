@@ -18,6 +18,70 @@ import '../../../providers/theme_provider.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/app_language.dart';
 import '../../language/presentation/language_selection_screen.dart';
+import '../../../services/gemini/gemini_model_service.dart';
+
+/// Provider for managing available OCR models based on API key
+final ocrModelsProvider = StateNotifierProvider<OcrModelsNotifier, AsyncValue<List<String>>>(
+  (ref) => OcrModelsNotifier(),
+);
+
+class OcrModelsNotifier extends StateNotifier<AsyncValue<List<String>>> {
+  OcrModelsNotifier() : super(const AsyncValue.loading()) {
+    _loadModels();
+  }
+
+  final GeminiModelService _modelService = GeminiModelService();
+
+  Future<void> _loadModels() async {
+    state = const AsyncValue.loading();
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final apiKey = prefs.getString('api_key');
+      
+      if (apiKey == null || apiKey.isEmpty) {
+        // No API key, return default list
+        state = AsyncValue.data(['gemini-2.5-flash', 'gemini-2.0-flash']);
+        return;
+      }
+
+      final models = await _modelService.fetchAvailableModels(apiKey);
+      state = AsyncValue.data(models);
+    } catch (e, st) {
+      debugPrint('[OcrModelsNotifier] Error loading models: $e\n$st');
+      state = AsyncValue.error(e, st);
+    }
+  }
+
+  Future<void> refreshModels() async {
+    await _loadModels();
+  }
+}
+
+/// Provider for the currently selected OCR model
+final selectedOcrModelProvider = StateNotifierProvider<SelectedOcrModelNotifier, String>(
+  (ref) => SelectedOcrModelNotifier(),
+);
+
+class SelectedOcrModelNotifier extends StateNotifier<String> {
+  SelectedOcrModelNotifier() : super('gemini-2.0-flash') {
+    _loadModel();
+  }
+
+  Future<void> _loadModel() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedModel = prefs.getString('selected_ocr_model');
+    if (savedModel != null && savedModel.isNotEmpty) {
+      state = savedModel;
+    }
+  }
+
+  Future<void> selectModel(String modelId) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('selected_ocr_model', modelId);
+    state = modelId;
+    debugPrint('[SelectedOcrModelNotifier] Model selected: $modelId');
+  }
+}
 
 class SettingsTab extends ConsumerStatefulWidget {
   const SettingsTab({super.key});
@@ -828,6 +892,184 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
               ),
             ],
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOcrModelSelector(BuildContext context) {
+    final localizations = _createLocalizations();
+    final isRTL = localizations.language.textDirection == TextDirection.rtl;
+    final modelsAsync = ref.watch(ocrModelsProvider);
+    final selectedModel = ref.watch(selectedOcrModelProvider);
+    final modelNotifier = ref.read(selectedOcrModelProvider.notifier);
+    
+    return Semantics(
+      label: 'انتخاب مدل OCR',
+      child: Card(
+        elevation: 0,
+        color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.auto_awesome,
+                    color: Theme.of(context).colorScheme.primary,
+                    size: 28,
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    'مدل هوش مصنوعی',
+                    textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'مدلی را برای استخراج متن انتخاب کنید',
+                textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                ),
+              ),
+              const SizedBox(height: 16),
+              
+              modelsAsync.when(
+                data: (models) {
+                  if (models.isEmpty) {
+                    return Text(
+                      'هیچ مدلی در دسترس نیست',
+                      textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Colors.orange,
+                      ),
+                    );
+                  }
+                  
+                  return DropdownButtonFormField<String>(
+                    value: models.contains(selectedModel) ? selectedModel : models.first,
+                    decoration: InputDecoration(
+                      labelText: 'مدل فعلی',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      filled: true,
+                      prefixIcon: const Icon(Icons.smart_display),
+                    ),
+                    items: models.map((modelId) {
+                      final displayName = GeminiModelService().getDisplayName(modelId);
+                      return DropdownMenuItem<String>(
+                        value: modelId,
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 32,
+                              height: 32,
+                              decoration: BoxDecoration(
+                                color: modelId == selectedModel 
+                                    ? Theme.of(context).colorScheme.primary 
+                                    : Theme.of(context).colorScheme.primaryContainer,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Center(
+                                child: Icon(
+                                  modelId == selectedModel 
+                                      ? Icons.check 
+                                      : Icons.auto_awesome,
+                                  size: 18,
+                                  color: modelId == selectedModel 
+                                      ? Theme.of(context).colorScheme.onPrimary 
+                                      : Theme.of(context).colorScheme.onPrimaryContainer,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    displayName,
+                                    style: TextStyle(
+                                      fontWeight: modelId == selectedModel 
+                                          ? FontWeight.bold 
+                                          : FontWeight.normal,
+                                    ),
+                                  ),
+                                  Text(
+                                    modelId,
+                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (String? newModel) async {
+                      if (newModel != null && newModel != selectedModel) {
+                        await modelNotifier.selectModel(newModel);
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'مدل به ${GeminiModelService().getDisplayName(newModel)} تغییر یافت',
+                                textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
+                              ),
+                              backgroundColor: Colors.green,
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        }
+                      }
+                    },
+                  );
+                },
+                loading: () => const Center(
+                  child: CircularProgressIndicator(),
+                ),
+                error: (error, st) => Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'خطا در دریافت مدل‌ها: ${error.toString()}',
+                      textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Colors.red,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    ElevatedButton.icon(
+                      onPressed: () => ref.read(ocrModelsProvider.notifier).refreshModels(),
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('تلاش مجدد'),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'نکته: مدل‌های جدیدتر معمولاً دقیق‌تر هستند اما ممکن است محدودیت استفاده داشته باشند',
+                textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

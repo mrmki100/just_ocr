@@ -13,6 +13,7 @@ import 'package:just_ocr/services/file_import_service_impl.dart';
 import 'package:just_ocr/services/ocr_service_impl.dart';
 import 'package:just_ocr/features/reader/book_notifier.dart';
 import 'package:just_ocr/services/auth/auth_service_impl.dart';
+import 'package:just_ocr/features/dashboard/presentation/settings_tab.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,15 +22,16 @@ void main() async {
   final authService = AuthServiceImpl();
   await authService.initialize();
   
-  // Get the user's selected OCR model from preferences
-  final selectedModel = await authService.getSelectedOcrModel() ?? 'gemini-2.0-flash';
-
   runApp(
     ProviderScope(
       overrides: [
         sharedPreferencesProvider.overrideWithValue(prefs),
         fileImportServiceProvider.overrideWith((ref) => FileImportServiceImpl()),
-        ocrServiceProvider.overrideWith((ref) => OcrServiceImpl(prefs, modelName: selectedModel)),
+        // OCR service will be created with the selected model dynamically
+        ocrServiceProvider.overrideWith((ref) {
+          final selectedModel = ref.watch(selectedOcrModelProvider);
+          return OcrServiceImpl(prefs, modelName: selectedModel);
+        }),
       ],
       child: const MyApp(), 
     ),
