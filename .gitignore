@@ -1,60 +1,25 @@
 ```
-# Build artifacts
-*.apk
-*.aar
-*.jar
-*.class
-build/
-app/build/
-
 # Dependencies
-node_modules/
-.libs/
-vendor/
+.dart_tool/
+.build/
+.pub/
+pubspec.lock
 
 # Logs
 *.log
-
-# Environment
-.env
-.env.local
-*.env
-
-# IDE files
-.idea/
-*.iml
-*.ipr
-*.iws
-.vscode/
-*.swp
-*.swo
+**/logs
 
 # OS generated files
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
-
-# Coverage reports
-coverage/
-htmlcov/
-*.coverage
-
-# Python specific
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.Python
-*.so
-*.egg-info/
-.eggs/
-dist/
-*.egg
-
-# Gradle
-.gradle/
-!gradle/wrapper/gradle-wrapper.jar
 
 # Temporary files
 *.tmp
+*.temp
 *~
 ```
