@@ -12,6 +12,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../services/auth/auth_service_impl.dart';
 import '../../dashboard/presentation/main_dashboard.dart';
+import '../../l10n/app_localizations.dart';
+import '../../l10n/app_language.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -24,11 +26,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final AuthServiceImpl _authService = AuthServiceImpl();
   bool _isLoading = false;
   String? _errorMessage;
+  AppLanguage _currentLanguage = AppLanguage.persian;
 
   @override
   void initState() {
     super.initState();
     _initializeAuth();
+    _loadCurrentLanguage();
+  }
+
+  Future<void> _loadCurrentLanguage() async {
+    final languageCode = await _authService.getCurrentLanguageCode();
+    setState(() {
+      _currentLanguage = AppLanguage.fromCode(languageCode ?? 'fa');
+    });
+  }
+
+  AppLocalizations _createLocalizations() {
+    return AppLocalizations(_currentLanguage);
   }
 
   Future<void> _initializeAuth() async {
@@ -86,15 +101,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           );
         }
       } else if (mounted) {
+        final localizations = _createLocalizations();
         setState(() {
-          _errorMessage = 'ورود با گوگل ناموفق بود. لطفاً دوباره تلاش کنید.';
+          _errorMessage = localizations.loginWithGoogle + ' ' + 
+              (localizations.language == AppLanguage.persian ? 'ناموفق بود. لطفاً دوباره تلاش کنید.' : 
+               localizations.language == AppLanguage.dutch ? 'mislukt. Probeer het opnieuw.' :
+               localizations.language == AppLanguage.arabic ? 'فشل. حاول مرة أخرى.' :
+               'failed. Please try again.');
         });
       }
     } catch (e) {
       debugPrint('[LoginScreen] Sign-in error: $e');
       if (mounted) {
+        final localizations = _createLocalizations();
         setState(() {
-          _errorMessage = 'خطا در ورود: ${e.toString()}';
+          _errorMessage = '${localizations.error}: ${e.toString()}';
         });
       }
     } finally {
@@ -108,6 +129,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = _createLocalizations();
+    final isRTL = localizations.language.textDirection == TextDirection.rtl;
+    
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -118,7 +142,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               children: [
                 // App Logo/Icon
                 Semantics(
-                  label: 'لوگو برنامه justOCR',
+                  label: '${localizations.appName} ${localizations.welcome}',
                   child: Container(
                     width: 120,
                     height: 120,
@@ -139,7 +163,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 
                 // App Title
                 Text(
-                  'justOCR',
+                  localizations.appName,
                   style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: Theme.of(context).colorScheme.primary,
@@ -150,8 +174,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 
                 // Subtitle
                 Text(
-                  'دستیار خواندن برای نابینایان و کم‌بینایان',
-                  textDirection: TextDirection.rtl,
+                  localizations.loginSubtitle,
+                  textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         color: Theme.of(context)
                             .colorScheme
@@ -183,7 +207,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         Expanded(
                           child: Text(
                             _errorMessage!,
-                            textDirection: TextDirection.rtl,
+                            textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
                             style: TextStyle(color: Colors.red.shade900),
                           ),
                         ),
@@ -196,7 +220,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 // Sign In Button
                 Semantics(
                   button: true,
-                  label: 'ورود با حساب گوگل',
+                  label: localizations.loginWithGoogle,
                   child: ElevatedButton.icon(
                     onPressed: _isLoading ? null : _handleGoogleSignIn,
                     icon: _isLoading
@@ -216,7 +240,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             color: Theme.of(context).colorScheme.onPrimary,
                           ),
                     label: Text(
-                      _isLoading ? 'در حال ورود...' : 'ورود با گوگل',
+                      _isLoading ? localizations.loading : localizations.loginWithGoogle,
                       style: const TextStyle(fontSize: 18),
                     ),
                     style: ElevatedButton.styleFrom(
@@ -233,9 +257,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 
                 // Info Text
                 Text(
-                  'پس از ورود، باید کلید API گوگل خود را تنظیم کنید.\n'
-                  'این کلید محدودیت‌های شما را تعیین می‌کند.',
-                  textDirection: TextDirection.rtl,
+                  '${localizations.apiKeyInstructions}\n${localizations.setupApiKey} ${localizations.loginTitle}.',
+                  textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: Theme.of(context)

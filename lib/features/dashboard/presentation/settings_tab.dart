@@ -15,6 +15,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../services/auth/auth_service_impl.dart';
 import '../../../providers/theme_provider.dart';
+import '../../l10n/app_localizations.dart';
+import '../../l10n/app_language.dart';
 
 class SettingsTab extends ConsumerStatefulWidget {
   const SettingsTab({super.key});
@@ -33,6 +35,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
   String? _apiKey;
   bool _isLoggedIn = false;
   String? _userEmail;
+  AppLanguage _currentLanguage = AppLanguage.persian;
   
   final AuthServiceImpl _authService = AuthServiceImpl();
 
@@ -41,6 +44,18 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
     super.initState();
     _loadSettings();
     _loadAuthStatus();
+    _loadCurrentLanguage();
+  }
+
+  Future<void> _loadCurrentLanguage() async {
+    final languageCode = await _authService.getCurrentLanguageCode();
+    setState(() {
+      _currentLanguage = AppLanguage.fromCode(languageCode ?? 'fa');
+    });
+  }
+
+  AppLocalizations _createLocalizations() {
+    return AppLocalizations(_currentLanguage);
   }
 
   Future<void> _loadAuthStatus() async {
@@ -145,6 +160,9 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = _createLocalizations();
+    final isRTL = localizations.language.textDirection == TextDirection.rtl;
+    
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -154,8 +172,8 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
           Semantics(
             header: true,
             child: Text(
-              'تنظیمات',
-              textDirection: TextDirection.rtl,
+              localizations.settings,
+              textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -163,8 +181,8 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
           ),
           const SizedBox(height: 8),
           Text(
-            'تنظیمات دسترسی و خواندن را سفارشی کنید',
-            textDirection: TextDirection.rtl,
+            localizations.accessibilitySettings,
+            textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Theme.of(context)
                       .colorScheme
@@ -175,18 +193,18 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
           const SizedBox(height: 24),
 
           // Account Section
-          _buildSectionHeader(context, 'حساب کاربری'),
+          _buildSectionHeader(context, localizations.accountSection),
           _buildAccountCard(context),
           
           const Divider(height: 32),
 
           // Text-to-Speech Section
-          _buildSectionHeader(context, 'خواندن با صدای بلند'),
+          _buildSectionHeader(context, localizations.readAloud),
           _buildToggleTile(
             context,
             icon: Icons.volume_up,
-            title: 'فعال‌سازی TTS',
-            subtitle: 'متن را با صدای بلند بخوان',
+            title: localizations.ttsSettings,
+            subtitle: localizations.readAloud,
             value: _ttsEnabled,
             onChanged: (value) {
               setState(() => _ttsEnabled = value);
@@ -200,12 +218,12 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
           const Divider(height: 32),
 
           // Accessibility Section
-          _buildSectionHeader(context, 'دسترسی‌پذیری'),
+          _buildSectionHeader(context, localizations.accessibilitySettings),
           _buildToggleTile(
             context,
             icon: Icons.contrast,
-            title: 'کنتراست بالا',
-            subtitle: 'افزایش کنتراست برای دید بهتر',
+            title: localizations.highContrastMode,
+            subtitle: localizations.highContrastMode,
             value: _highContrast,
             onChanged: (value) {
               setState(() => _highContrast = value);
@@ -215,8 +233,8 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
           _buildToggleTile(
             context,
             icon: Icons.text_fields,
-            title: 'متن بزرگ',
-            subtitle: 'افزایش اندازه متن برای خوانایی بهتر',
+            title: localizations.largeText,
+            subtitle: localizations.largeText,
             value: _largeText,
             onChanged: (value) {
               setState(() => _largeText = value);
@@ -227,13 +245,13 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
           const Divider(height: 32),
 
           // Appearance Section - Dark Mode Toggle
-          _buildSectionHeader(context, 'ظاهر'),
+          _buildSectionHeader(context, localizations.settings),
           _buildThemeSelector(context),
 
           const Divider(height: 32),
 
           // About Section
-          _buildSectionHeader(context, 'درباره برنامه'),
+          _buildSectionHeader(context, localizations.appName),
           _buildAboutTile(context),
         ],
       ),
@@ -241,11 +259,14 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
   }
 
   Widget _buildSectionHeader(BuildContext context, String title) {
+    final localizations = _createLocalizations();
+    final isRTL = localizations.language.textDirection == TextDirection.rtl;
+    
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Text(
         title,
-        textDirection: TextDirection.rtl,
+        textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
         style: Theme.of(context).textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.bold,
               color: Theme.of(context).colorScheme.primary,
@@ -262,9 +283,12 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
     required bool value,
     required ValueChanged<bool> onChanged,
   }) {
+    final localizations = _createLocalizations();
+    final isRTL = localizations.language.textDirection == TextDirection.rtl;
+    
     return Semantics(
       button: true,
-      label: '$title: ${value ? "فعال" : "غیرفعال"}',
+      label: '$title: ${value ? (isRTL ? "فعال" : "Active") : (isRTL ? "غیرفعال" : "Inactive")}',
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
@@ -278,12 +302,12 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
         ),
         title: Text(
           title,
-          textDirection: TextDirection.rtl,
+          textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
           style: Theme.of(context).textTheme.titleMedium,
         ),
         subtitle: Text(
           subtitle,
-          textDirection: TextDirection.rtl,
+          textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Theme.of(context)
                     .colorScheme
@@ -584,8 +608,8 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
             ] else ...[
               // Not logged in state
               Text(
-                'برای استفاده از اسکن ابری، باید وارد حساب گوگل خود شوید.',
-                textDirection: TextDirection.rtl,
+                localizations.getString('loginRequired') ?? 'برای استفاده از اسکن ابری، باید وارد حساب گوگل خود شوید.',
+                textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               const SizedBox(height: 16),
@@ -607,7 +631,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                     }
                   },
                   icon: const Icon(Icons.login),
-                  label: const Text('ورود با گوگل'),
+                  label: Text(localizations.loginWithGoogle),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
