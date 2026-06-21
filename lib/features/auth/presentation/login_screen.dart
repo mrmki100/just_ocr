@@ -95,7 +95,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             ),
           );
           
-          // Navigate anyway, OCR will fallback to ML Kit
+          // Navigate anyway, OCR will fallback to PaddleOCR (offline)
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (_) => const MainDashboard()),
           );
