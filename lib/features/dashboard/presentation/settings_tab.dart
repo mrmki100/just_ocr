@@ -17,6 +17,7 @@ import '../../../services/auth/auth_service_impl.dart';
 import '../../../providers/theme_provider.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/app_language.dart';
+import '../../language/presentation/language_selection_screen.dart';
 
 class SettingsTab extends ConsumerStatefulWidget {
   const SettingsTab({super.key});
@@ -241,6 +242,12 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
               _saveSetting('large_text', value);
             },
           ),
+
+          const Divider(height: 32),
+
+          // Language Section
+          _buildSectionHeader(context, localizations.languageChange),
+          _buildLanguageSelector(context),
 
           const Divider(height: 32),
 
@@ -480,6 +487,179 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
         ),
       ),
     );
+  }
+
+  Widget _buildLanguageSelector(BuildContext context) {
+    final localizations = _createLocalizations();
+    final isRTL = localizations.language.textDirection == TextDirection.rtl;
+    final currentLanguage = ref.watch(appLanguageProvider);
+    final languageNotifier = ref.read(appLanguageProvider.notifier);
+    
+    return Semantics(
+      label: localizations.changeLanguage,
+      child: Card(
+        elevation: 0,
+        color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.language,
+                    color: Theme.of(context).colorScheme.primary,
+                    size: 28,
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    localizations.currentLanguage,
+                    textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              
+              // Current language display
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primary,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Center(
+                        child: Text(
+                          currentLanguage.code.toUpperCase(),
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onPrimary,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            currentLanguage.nativeName,
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            _getLanguageEnglishName(currentLanguage),
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              
+              // Language dropdown
+              DropdownButtonFormField<AppLanguage>(
+                value: currentLanguage,
+                decoration: InputDecoration(
+                  labelText: localizations.changeLanguage,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  filled: true,
+                  prefixIcon: const Icon(Icons.translate),
+                ),
+                items: AppLanguage.values.map((language) {
+                  return DropdownMenuItem<AppLanguage>(
+                    value: language,
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.primaryContainer,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Center(
+                            child: Text(
+                              language.code.toUpperCase(),
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.onPrimaryContainer,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(language.nativeName),
+                      ],
+                    ),
+                  );
+                }).toList(),
+                onChanged: (AppLanguage? newLanguage) async {
+                  if (newLanguage != null && newLanguage != currentLanguage) {
+                    await languageNotifier.setLanguage(newLanguage);
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            '${localizations.done} - ${localizations.currentLanguage}: ${newLanguage.nativeName}',
+                            textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
+                          ),
+                          backgroundColor: Colors.green,
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    }
+                  }
+                },
+              ),
+              const SizedBox(height: 8),
+              Text(
+                localizations.languageChange,
+                textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _getLanguageEnglishName(AppLanguage language) {
+    switch (language) {
+      case AppLanguage.persian:
+        return 'Persian / فارسی';
+      case AppLanguage.dutch:
+        return 'Dutch / Nederlands';
+      case AppLanguage.arabic:
+        return 'Arabic / العربية';
+      case AppLanguage.english:
+        return 'English';
+    }
   }
 
   Widget _buildAboutTile(BuildContext context) {
