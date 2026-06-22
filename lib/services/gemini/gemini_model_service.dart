@@ -91,7 +91,6 @@ class GeminiModelService {
 
   /// Gets a human-readable name for the model ID.
   String getDisplayName(String modelId) {
-    if (modelId == 'paddle-ocr') return 'PaddleOCR Mobile (Offline, Open-Source)';
     if (modelId == 'gemini-2.5-flash') return 'Gemini 2.5 Flash (Recommended - Fast & Accurate)';
     if (modelId == 'gemini-2.5-flash-lite') return 'Gemini 2.5 Flash Lite (Lightweight)';
     if (modelId == 'gemini-3.1-flash') return 'Gemini 3.1 Flash (Latest Version)';

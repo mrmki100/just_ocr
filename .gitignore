@@ -1,14 +1,17 @@
-# Compiled and build artifacts
+```
+# Build artifacts
 *.pyc
 __pycache__/
 *.o
 *.obj
-*.class
+*.exe
 *.dll
 *.so
 *.a
-*.exe
 *.out
+dist/
+build/
+target/
 
 # Dependencies
 node_modules/
@@ -16,30 +19,24 @@ venv/
 .venv/
 .env
 .env.local
-.env.*
+*.env.*
 
-# Logs and temp files
-*.log
-*.tmp
-*.swp
-*.swo
-
-# Editors
+# IDE and editor files
 .vscode/
 .idea/
+*.swp
+*.swo
+*.tmp
 
-# Build directories
-dist/
-build/
-target/
-.gradle/
-.mypy_cache/
-.pytest_cache/
+# Logs
+*.log
+
+# Coverage
 coverage/
 htmlcov/
 .coverage
 
-# System files
+# OS generated files
 .DS_Store
 Thumbs.db
 
@@ -66,3 +63,77 @@ Thumbs.db
 *.tar.bz2
 *.tar.xz
 *.tar.zst
+
+# Python specific
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+.Python
+*.so
+.Python
+*.egg-info/
+.eggs/
+.mypy_cache/
+.pytest_cache/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+.git/
+.hg/
+.svn/
+.wafpickle-*
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Dart/Flutter specific
+.dart_tool/
+.packages
+.pub-cache/
+pubspec.lock
+*.g.dart
+*.freezed.dart
+*.config.dart
+*.gen.dart
+*.gr.dart
+*.g.part
+*.freezed.part
+*.config.part
+*.gen.part
+*.gr.part
+ios/Pods/
+ios/.symlinks/
+android/.gradle/
+android/app/build/
+.flutter-plugins
+.flutter-plugins-dependencies
+local.properties
+.key
+
+# Gradle
+.gradle/
+build/
+
+# Temporary folders
+temp/
+tmp/
+```
