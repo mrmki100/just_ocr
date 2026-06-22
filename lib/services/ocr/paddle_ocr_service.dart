@@ -5,7 +5,7 @@ import '../logging/event_logger.dart';
 
 class PaddleOcrService {
   final EventLogger _logger = EventLogger();
-  late final PaddleOCR _paddleOCR;
+  late final PaddleOCRFlutter _paddleOCR;
   bool _isInitialized = false;
 
   /// Initialize PaddleOCR with Persian/Arabic support
@@ -20,16 +20,14 @@ class PaddleOcrService {
         message: 'Initializing PaddleOCR engine...',
       );
 
-      _paddleOCR = PaddleOCR();
+      _paddleOCR = PaddleOcrFlutter();
       
       // Initialize with models that support Persian/Arabic
-      // PaddleOCR PP-OCRv4 has excellent multilingual support
+      // PaddleOCR PP-OCRv5 has excellent multilingual support
       await _paddleOCR.init(
-        detModelPath: null, // Use default bundled model
-        recModelPath: null, // Use default bundled model
-        clsModelPath: null, // Use default classification model
-        useGpu: false, // Use CPU for mobile compatibility
         threadNum: 4, // Use multiple threads for speed
+        modelDir: 'models', // Default bundled model directory
+        labelPath: 'labels/ppocr_keys_v1.txt', // Default label path
       );
 
       _isInitialized = true;
@@ -68,14 +66,8 @@ class PaddleOcrService {
         message: 'Starting PaddleOCR text recognition...',
       );
 
-      // Convert File to Uint8List for PaddleOCR
-      final bytes = await imageFile.readAsBytes();
-
-      // Run OCR
-      final List<OcrResult> results = await _paddleOCR.predictImage(
-        imageData: bytes,
-        isAsset: false,
-      );
+      // Run OCR using the recognize method with file path
+      final List<OcrResult> results = await _paddleOCR.recognize(imageFile.path);
 
       // Extract text from results while preserving structure
       StringBuffer structuredText = StringBuffer();
@@ -146,9 +138,9 @@ class PaddleOcrService {
   }
 
   /// Cleanup resources
-  void dispose() {
+  Future<void> dispose() async {
     if (_isInitialized) {
-      _paddleOCR.dispose();
+      await _paddleOCR.dispose();
       _isInitialized = false;
     }
   }

@@ -56,5 +56,5 @@ class GeminiOcrService {
     }
   }
 
-  void dispose() {}
+  Future<void> dispose() async {}
 }
