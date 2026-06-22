@@ -5,7 +5,7 @@ import '../logging/event_logger.dart';
 
 class PaddleOcrService {
   final EventLogger _logger = EventLogger();
-  late final PaddleOCRFlutter _paddleOCR;
+  late final PaddleOCR _paddleOCR;
   bool _isInitialized = false;
 
   /// Initialize PaddleOCR with Persian/Arabic support
@@ -20,7 +20,7 @@ class PaddleOcrService {
         message: 'Initializing PaddleOCR engine...',
       );
 
-      _paddleOCR = PaddleOcrFlutter();
+      _paddleOCR = PaddleOCR();
       
       // Initialize with models that support Persian/Arabic
       // PaddleOCR PP-OCRv5 has excellent multilingual support
