@@ -252,7 +252,7 @@ class OcrServiceImpl implements OcrService {
   }
 
   /// Cleanup resources
-  void dispose() {
-    _paddleOcrService.dispose();
+  Future<void> dispose() async {
+    await _paddleOcrService.dispose();
   }
 }

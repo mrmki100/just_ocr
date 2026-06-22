@@ -63,7 +63,7 @@ class PdfParserService {
       }
       
       await document.close();
-      _ocrService.dispose();
+      await _ocrService.dispose();
 
       return extractedPages; // 👈 CHANGE THIS LINE
 
