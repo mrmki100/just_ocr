@@ -37,7 +37,7 @@ class OcrModelsNotifier extends StateNotifier<AsyncValue<List<String>>> {
       final prefs = await SharedPreferences.getInstance();
       final apiKey = prefs.getString('gemini_api_key');
 
-      final List<String> allModels = ['paddle-ocr'];
+      final List<String> allModels = [];
 
       if (apiKey == null || apiKey.isEmpty) {
         state = AsyncValue.data(allModels);
@@ -56,7 +56,7 @@ class OcrModelsNotifier extends StateNotifier<AsyncValue<List<String>>> {
       state = AsyncValue.data(allModels);
     } catch (e, st) {
       debugPrint('[OcrModelsNotifier] Error loading models: $e\n$st');
-      state = AsyncValue.data(['paddle-ocr', ...GeminiModelService.allowedGeminiModels]);
+      state = AsyncValue.data([...GeminiModelService.allowedGeminiModels]);
     }
   }
 

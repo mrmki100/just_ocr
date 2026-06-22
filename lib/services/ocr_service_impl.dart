@@ -13,7 +13,6 @@ import 'package:pdfx/pdfx.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../core/constants/app_constants.dart';
 import '../features/reader/book_notifier.dart';
-import 'ocr/paddle_ocr_service.dart';
 
 class OcrServiceImpl implements OcrService {
   // Gemini model for cloud OCR (better for Persian/Arabic)
@@ -21,15 +20,11 @@ class OcrServiceImpl implements OcrService {
   final SharedPreferences _prefs;
   String _modelName;
   
-  // PaddleOCR for offline fallback (open-source, supports Persian/Arabic)
-  final PaddleOcrService _paddleOcrService = PaddleOcrService();
-  bool _isPaddleInitialized = false;
-  
   // Rate limiting: track last request time to enforce 10-second interval
   DateTime? _lastRequestTime;
   final Duration _requestInterval = AppConstants.geminiRequestInterval;
 
-  OcrServiceImpl(this._prefs, {String? modelName}) : _modelName = modelName ?? 'paddle-ocr' {
+  OcrServiceImpl(this._prefs, {String? modelName}) : _modelName = modelName ?? AppConstants.defaultOcrModel {
     _initializeModel();
   }
 
@@ -37,16 +32,14 @@ class OcrServiceImpl implements OcrService {
     // API key will be retrieved from SharedPreferences at runtime
     final apiKey = _prefs.getString('gemini_api_key') ?? '';
     
-    if (apiKey.isEmpty && !_modelName.startsWith('paddle')) {
+    if (apiKey.isEmpty) {
       debugPrint('⚠️ WARNING: GEMINI_API_KEY not provided. Cloud OCR will fail.');
     }
     
-    if (!_modelName.startsWith('paddle')) {
-      _geminiModel = GenerativeModel(
-        model: _modelName,
-        apiKey: apiKey,
-      );
-    }
+    _geminiModel = GenerativeModel(
+      model: _modelName,
+      apiKey: apiKey,
+    );
   }
 
   /// Update the model name and reinitialize the Gemini model
@@ -90,7 +83,7 @@ class OcrServiceImpl implements OcrService {
       } else if (['.jpg', '.jpeg', '.png'].any((ext) => path.endsWith(ext))) {
         // Single image processing
         onProgress('در حال استخراج متن از تصویر...', null);
-        final String text = await _processImage(file, useGemini: true);
+        final String text = await _processImage(file);
         return [text];
       } else {
         throw UnsupportedError(
@@ -153,13 +146,9 @@ class OcrServiceImpl implements OcrService {
           0.5 + (progress * 0.5), // Second 50% for OCR
         );
 
-        // Run OCR on the page image based on selected model
+        // Run OCR on the page image using Gemini
         // Each page is rate-limited to 10 seconds between requests
-        final bool useGemini = !_modelName.startsWith('paddle');
-        final String pageText = await _processImage(
-          tempImageFile,
-          useGemini: useGemini,
-        );
+        final String pageText = await _processImage(tempImageFile);
 
         extractedPages.add(pageText.isNotEmpty ? pageText : '⚠️ متنی در صفحه $i یافت نشد');
         
@@ -190,21 +179,10 @@ class OcrServiceImpl implements OcrService {
     return ['پشتیبانی از فایل‌های EPUB در نسخه آینده اضافه خواهد شد.'];
   }
 
-  /// Process single image with OCR (Gemini preferred, PaddleOCR fallback)
+  /// Process single image with OCR using Gemini
   /// Rate-limited to 1 request per 10 seconds for Gemini API calls
-  Future<String> _processImage(File imageFile, {required bool useGemini}) async {
-    // Try Gemini first for best Persian/Arabic accuracy
-    if (useGemini) {
-      try {
-        return await _geminiOcr(imageFile);
-      } catch (e) {
-        debugPrint('[OcrServiceImpl] Gemini failed, falling back to PaddleOCR: $e');
-        // Fall through to PaddleOCR
-      }
-    }
-
-    // Fallback to PaddleOCR (offline, open-source, excellent Persian/Arabic support)
-    return await _paddleOcr(imageFile);
+  Future<String> _processImage(File imageFile) async {
+    return await _geminiOcr(imageFile);
   }
 
   /// Cloud OCR using Gemini (best for Persian/Arabic)
@@ -239,20 +217,8 @@ class OcrServiceImpl implements OcrService {
     return text.trim();
   }
 
-  /// Offline OCR using PaddleOCR (fallback option)
-  /// Open-source, supports Persian/Arabic, no API quota limits
-  Future<String> _paddleOcr(File imageFile) async {
-    final String? result = await _paddleOcrService.processImage(imageFile);
-    
-    if (result == null || result.isEmpty) {
-      throw StateError('PaddleOCR found no text or failed to process image');
-    }
-    
-    return result;
-  }
-
   /// Cleanup resources
   Future<void> dispose() async {
-    await _paddleOcrService.dispose();
+    // No additional cleanup needed for cloud-only architecture
   }
 }
