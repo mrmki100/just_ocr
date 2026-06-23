@@ -132,6 +132,7 @@ class OcrServiceImpl implements OcrService {
         // Rate limiting: wait 20 seconds before processing the next page
         // to comply with Gemini's RPM (Requests Per Minute) limits
         if (i < pagesToProcess) {
+          debugPrint('[OcrServiceImpl] Rate limit: waiting 20s before next request');
           await Future.delayed(const Duration(seconds: 20));
         }
       }
@@ -243,7 +244,15 @@ class OcrServiceImpl implements OcrService {
 
     String? text;
     try {
-      final response = await _geminiModel.generateContent(content);
+      final response = await _geminiModel.generateContent(
+        content,
+        generationConfig: GenerationConfig(
+          temperature: 0.1,
+          topK: 1,
+          topP: 0.95,
+          maxOutputTokens: 4096,
+        ),
+      );
       text = response.text;
     } on ClientException catch (e) {
       final apiError = GeminiApiException.fromException(e);
@@ -252,6 +261,15 @@ class OcrServiceImpl implements OcrService {
       final apiError = GeminiApiException.fromException(e);
       throw apiError;
     } catch (e) {
+      // Handle empty response or parsing errors
+      if (e.toString().contains('Unhandled format') || 
+          e.toString().contains('Content: {}')) {
+        throw GeminiApiException(
+          message: 'Gemini API returned an empty or invalid response. This may be due to rate limiting.',
+          technicalDetails: e.toString(),
+          errorType: GeminiErrorType.rateLimitExceeded,
+        );
+      }
       throw GeminiApiException.fromException(e);
     }
     
