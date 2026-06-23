@@ -1,21 +1,22 @@
 ```
-# Dependencies
-.dart_tool/
-.build/
-.pub/
+# Generated/compiled files
+*.g.dart
 
-# Logs and temp files
-*.log
-*.tmp
+# Dependencies
+.pub-cache/
+.dart_tool/
+build/
 
 # Environment
 .env
 .env.local
 *.env.*
 
-# Editor/IDE
-.vscode/
-.idea/
+# Logs
+*.log
+
+# Temporary files
+*.tmp
 *.swp
 *.swo
 
@@ -23,13 +24,7 @@
 .DS_Store
 Thumbs.db
 
-# Coverage
-coverage/
-htmlcov/
-.coverage
-
-# Build outputs
-build/
-dist/
-target/
+# IDE specific
+.vscode/
+.idea/
 ```
