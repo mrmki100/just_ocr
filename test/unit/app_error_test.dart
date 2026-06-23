@@ -282,7 +282,7 @@ void main() {
     test('should return false for non-retryable OcrException', () {
       const error = OcrException(
         message: 'No text',
-        failureType: OcrFailureType.noTextRetected,
+        failureType: OcrFailureType.noTextDetected,
       );
 
       expect(error.isRetryable, isFalse);

@@ -13,6 +13,7 @@ import 'l10n/app_localizations.dart';
 import 'services/file_import_service_impl.dart';
 import 'services/ocr_service_impl.dart';
 import 'services/auth/auth_service_impl.dart';
+import 'services/library/library_service_impl.dart';
 
 void main() async {
   // 1. Enforce binding initialization before async native channels run
@@ -32,6 +33,7 @@ void main() async {
         sharedPreferencesProvider.overrideWithValue(prefs),
         fileImportServiceProvider.overrideWith((ref) => FileImportServiceImpl()),
         ocrServiceProvider.overrideWith((ref) => OcrServiceImpl(prefs)),
+        libraryServiceProvider.overrideWith((ref) => LibraryServiceImpl()),
       ],
       child: const MyApp(), 
     ),

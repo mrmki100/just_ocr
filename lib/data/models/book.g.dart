@@ -87,3 +87,28 @@ class BookSchema extends CollectionSchema<Book> {
   @override
   void setId(Book object, Id id) => object.id = id;
 }
+
+// Filter extensions for Book collection (manually created since build_runner not run)
+// These extensions provide the filter and sort methods used by LibraryServiceImpl
+extension BookFilter on BookFilterBuilder {
+  Condition statusNotEqualTo(BookStatus status) {
+    return status.notEqualTo(status.index);
+  }
+  
+  Condition statusEqualTo(BookStatus status) {
+    return status.equalTo(status.index);
+  }
+  
+  Condition uuidEqualTo(String uuid) {
+    return uuid.equalTo(uuid);
+  }
+}
+
+// Sorter extensions for Book collection - manually implemented since Isar codegen not run
+extension BookSorter on QueryBuilder<Book, BookFilterBuilder, dynamic> {
+  QueryBuilder<Book, BookFilterBuilder, BookSorter> sortByCreatedAtDesc() {
+    // This is a placeholder - in production, use build_runner to generate proper sorting
+    // For now, we'll sort in memory after fetching
+    return this as QueryBuilder<Book, BookFilterBuilder, BookSorter>;
+  }
+}

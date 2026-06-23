@@ -1,8 +1,14 @@
 ```
+# Build artifacts
+*.g.dart
+build/
+dist/
+
 # Dependencies
+node_modules/
 .pub/
 .dart_tool/
-build/
+.build/
 
 # Logs and temp files
 *.log
@@ -13,19 +19,22 @@ build/
 .env.local
 *.env.*
 
-# Editor/IDE
+# Editors
 .vscode/
 .idea/
 *.swp
 *.swo
+
+# OS generated files
+.DS_Store
+Thumbs.db
 
 # Coverage
 coverage/
 htmlcov/
 .coverage
 
-# Compiled and build artifacts
-*.o
-*.obj
-*.out
+# Testing
+*.tmp
+*.temp
 ```
