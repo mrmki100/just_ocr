@@ -151,24 +151,76 @@ class OcrServiceImpl implements OcrService {
   }
 
   /// Process single image with OCR (Gemini preferred, ML Kit fallback)
+  /// 
+  /// Throws [OcrException] if both Gemini and ML Kit fail.
   Future<String> _processImage(File imageFile, {required bool useGemini}) async {
     // Try Gemini first for best Persian/Arabic accuracy
     if (useGemini) {
       try {
         return await _geminiOcr(imageFile);
+      } on GeminiApiException catch (e) {
+        debugPrint('[OcrServiceImpl] Gemini API error: ${e.message}');
+        // Only fallback to ML Kit if the error allows it
+        if (!e.canFallback) {
+          throw OcrException(
+            message: 'Cloud OCR authentication failed. Please check your API key.',
+            technicalDetails: e.technicalDetails,
+            failureType: OcrFailureType.authenticationFailed,
+          );
+        }
+        // Fallback to ML Kit
+        debugPrint('[OcrServiceImpl] Falling back to ML Kit...');
+      } on OcrException catch (e) {
+        debugPrint('[OcrServiceImpl] Gemini OCR error: ${e.message}');
+        // Retryable errors can fallback
+        if (e.isRetryable || e.canFallback) {
+          debugPrint('[OcrServiceImpl] Falling back to ML Kit...');
+        } else {
+          rethrow;
+        }
       } catch (e) {
-        debugPrint('[OcrServiceImpl] Gemini failed, falling back to ML Kit: $e');
+        debugPrint('[OcrServiceImpl] Unexpected Gemini error, falling back to ML Kit: $e');
         // Fall through to ML Kit
       }
     }
 
     // Fallback to ML Kit (offline, but less accurate for Persian)
-    return await _mlKitOcr(imageFile);
+    try {
+      return await _mlKitOcr(imageFile);
+    } on AppError {
+      rethrow;
+    } catch (e) {
+      throw OcrException(
+        message: 'Both cloud and local OCR failed.',
+        technicalDetails: e.toString(),
+        failureType: OcrFailureType.unknown,
+      );
+    }
   }
 
   /// Cloud OCR using Gemini (best for Persian/Arabic)
+  /// 
+  /// Throws [GeminiApiException] for API errors.
+  /// Throws [OcrException] when no text is detected.
+  /// Throws [FileOperationException] for file I/O errors.
   Future<String> _geminiOcr(File imageFile) async {
-    final Uint8List imageBytes = await imageFile.readAsBytes();
+    final Uint8List imageBytes;
+    try {
+      imageBytes = await imageFile.readAsBytes();
+    } catch (e) {
+      throw FileOperationException(
+        message: 'Failed to read image file for OCR.',
+        technicalDetails: e.toString(),
+        operationType: FileOperationType.readFailed,
+      );
+    }
+    
+    if (imageBytes.isEmpty) {
+      throw OcrException(
+        message: 'Image file is empty.',
+        failureType: OcrFailureType.invalidImageFormat,
+      );
+    }
     
     final content = [
       Content.multi([
@@ -182,21 +234,53 @@ class OcrServiceImpl implements OcrService {
       ]),
     ];
 
-    final response = await _geminiModel.generateContent(content);
-    final String? text = response.text;
+    String? text;
+    try {
+      final response = await _geminiModel.generateContent(content);
+      text = response.text;
+    } on ClientException catch (e) {
+      final apiError = GeminiApiException.fromException(e);
+      throw apiError;
+    } on ApiException catch (e) {
+      final apiError = GeminiApiException.fromException(e);
+      throw apiError;
+    } catch (e) {
+      throw GeminiApiException.fromException(e);
+    }
     
     if (text == null || text.trim().isEmpty) {
-      throw StateError('Gemini returned empty text');
+      throw OcrException(
+        message: 'Gemini returned no text.',
+        failureType: OcrFailureType.noTextDetected,
+      );
     }
     
     return text.trim();
   }
 
   /// Offline OCR using ML Kit (fallback option)
+  /// 
+  /// Throws [MLKitException] for ML Kit processing errors.
+  /// Throws [OcrException] when no text is detected.
+  /// Throws [FileOperationException] for file I/O errors.
   Future<String> _mlKitOcr(File imageFile) async {
-    final InputImage inputImage = InputImage.fromFile(imageFile);
-    final RecognizedText recognizedText = 
-        await _mlKitRecognizer.processImage(inputImage);
+    InputImage inputImage;
+    try {
+      inputImage = InputImage.fromFile(imageFile);
+    } catch (e) {
+      throw FileOperationException(
+        message: 'Failed to load image for ML Kit.',
+        technicalDetails: e.toString(),
+        operationType: FileOperationType.readFailed,
+      );
+    }
+
+    final RecognizedText recognizedText;
+    try {
+      recognizedText = await _mlKitRecognizer.processImage(inputImage);
+    } catch (e) {
+      throw MLKitException.fromException(e);
+    }
 
     final StringBuffer structuredText = StringBuffer();
     
@@ -210,7 +294,10 @@ class OcrServiceImpl implements OcrService {
     final String result = structuredText.toString().trim();
     
     if (result.isEmpty) {
-      throw StateError('ML Kit found no text');
+      throw OcrException(
+        message: 'ML Kit found no text in the image.',
+        failureType: OcrFailureType.noTextDetected,
+      );
     }
     
     return result;
