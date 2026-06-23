@@ -52,6 +52,8 @@ dev_dependencies:
   build_runner: ^2.4.13
   isar_generator: ^3.1.0
   flutter_lints: ^6.0.0
+  mockito: ^5.4.4
+  test: ^1.25.7
 
 # CRITICAL OVERRIDE: Force google_generative_ai to 0.4.6+ to fix Content.system error
 dependency_overrides:
