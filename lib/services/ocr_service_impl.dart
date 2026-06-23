@@ -31,7 +31,7 @@ class OcrServiceImpl implements OcrService {
     }
     
     _geminiModel = GenerativeModel(
-      model: 'gemini-2.0-flash',
+      model: 'gemini-2.0-flash-lite',
       apiKey: apiKey,
     );
   }
