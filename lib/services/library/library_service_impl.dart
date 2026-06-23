@@ -30,6 +30,12 @@ class LibraryServiceImpl implements LibraryService {
           operationType: FileOperationType.unknown,
         );
       }
+      
+      // Ensure books collection exists
+      if (!_isar.collections.containsKey('Book')) {
+        debugPrint('[LibraryService] Warning: Book collection not found in Isar schema');
+      }
+      
       debugPrint('[LibraryService] Initialized successfully');
     } catch (e) {
       debugPrint('[LibraryService] Initialization failed: $e');
@@ -84,8 +90,10 @@ class LibraryServiceImpl implements LibraryService {
       final books = await _isar.books
           .filter()
           .statusNotEqualTo(BookStatus.deleted)
-          .sortByCreatedAtDesc()
           .findAll();
+      
+      // Sort in memory since sortByCreatedAtDesc is not properly generated
+      books.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       
       debugPrint('[LibraryService] Retrieved ${books.length} books');
       return books;
@@ -262,8 +270,10 @@ class LibraryServiceImpl implements LibraryService {
       final books = await _isar.books
           .filter()
           .statusEqualTo(status)
-          .sortByCreatedAtDesc()
           .findAll();
+      
+      // Sort in memory since sortByCreatedAtDesc is not properly generated
+      books.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       
       debugPrint('[LibraryService] Retrieved ${books.length} books with status $status');
       return books;

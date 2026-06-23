@@ -1,7 +1,7 @@
 import 'package:isar/isar.dart';
 
 part 'scan_event.g.dart'; // Required for Isar code generation
-part 'book.g.dart'; // Required for Isar code generation
+part 'book.g.dart'; // Required for Isar code generation - contains BookSchema and extensions
 
 @collection
 class ScanEvent {
