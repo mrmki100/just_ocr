@@ -128,6 +128,12 @@ class OcrServiceImpl implements OcrService {
         if (await tempImageFile.exists()) {
           await tempImageFile.delete();
         }
+        
+        // Rate limiting: wait 20 seconds before processing the next page
+        // to comply with Gemini's RPM (Requests Per Minute) limits
+        if (i < pagesToProcess) {
+          await Future.delayed(const Duration(seconds: 20));
+        }
       }
     } finally {
       await document.close();
