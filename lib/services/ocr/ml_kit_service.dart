@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
+import '../../core/error/app_error.dart';
 import '../../data/models/scan_event.dart';
 import '../logging/event_logger.dart';
 
@@ -9,7 +10,11 @@ class MLKitService {
   // Initialize the text recognizer for standard characters
   final _textRecognizer = TextRecognizer(script: TextRecognitionScript.latin);
 
-  /// Takes an image file and extracts text while preserving paragraph structure
+  /// Takes an image file and extracts text while preserving paragraph structure.
+  /// 
+  /// Throws [MLKitException] for ML Kit processing errors.
+  /// Throws [FileOperationException] for file I/O errors.
+  /// Throws [OcrException] when no text is detected.
   Future<String?> processImage(File imageFile) async {
     try {
       await _logger.logEvent(
@@ -19,10 +24,32 @@ class MLKitService {
         message: 'Starting high-fidelity local text recognition...',
       );
 
-      final inputImage = InputImage.fromFile(imageFile);
+      // Validate file exists
+      if (!await imageFile.exists()) {
+        throw FileOperationException(
+          message: 'Image file does not exist.',
+          operationType: FileOperationType.fileNotFound,
+        );
+      }
+
+      InputImage inputImage;
+      try {
+        inputImage = InputImage.fromFile(imageFile);
+      } catch (e) {
+        throw FileOperationException(
+          message: 'Failed to load image file for ML Kit.',
+          technicalDetails: e.toString(),
+          operationType: FileOperationType.readFailed,
+        );
+      }
       
       // Command ML Kit to analyze the image
-      final RecognizedText recognizedText = await _textRecognizer.processImage(inputImage);
+      final RecognizedText recognizedText;
+      try {
+        recognizedText = await _textRecognizer.processImage(inputImage);
+      } catch (e) {
+        throw MLKitException.fromException(e);
+      }
 
       // ---------------------------------------------------------
       // THE ACCURACY BOOST: Structural Extraction
@@ -42,6 +69,14 @@ class MLKitService {
 
       final finalText = structuredText.toString().trim();
 
+      // Validate that text was actually extracted
+      if (finalText.isEmpty) {
+        throw OcrException(
+          message: 'No text detected in the image by ML Kit.',
+          failureType: OcrFailureType.noTextDetected,
+        );
+      }
+
       await _logger.logEvent(
         severity: LogSeverity.info,
         module: 'OCR',
@@ -51,15 +86,23 @@ class MLKitService {
 
       return finalText;
 
-    } catch (e) {
+    } on AppError {
+      // Re-throw our structured errors as-is
+      rethrow;
+    } catch (e, stackTrace) {
+      // Catch-all for any unexpected errors
       await _logger.logEvent(
         severity: LogSeverity.error,
         module: 'OCR',
         eventName: 'OcrFailed',
-        message: 'Failed to process image with ML Kit.',
-        technicalDetails: e.toString(),
+        message: 'Critical unexpected error in ML Kit OCR.',
+        technicalDetails: '$e\n$stackTrace',
       );
-      return null;
+      throw OcrException(
+        message: 'An unexpected error occurred during ML Kit processing.',
+        technicalDetails: e.toString(),
+        failureType: OcrFailureType.unknown,
+      );
     }
   }
 
