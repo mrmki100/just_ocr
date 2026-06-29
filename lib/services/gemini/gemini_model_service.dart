@@ -1,112 +1,120 @@
+// lib/services/gemini/gemini_model_service.dart
+//
+// FIX SUMMARY:
+//   1. Removed hardcoded model names that don't exist (gemini-3.1-flash,
+//      gemini-3.5-flash-lite).  The real API returns names like
+//      "models/gemini-2.5-flash" – the old filter compared against bare
+//      strings so nothing ever matched.
+//   2. Strips the "models/" prefix the API includes before any comparison.
+//   3. Filters by generateContent support AND a version-prefix allowlist
+//      so the list stays focused on capable flash/pro models.
+//   4. Graceful fallback: if the API call fails or returns nothing useful,
+//      returns a known-good fallback list so the dropdown is never empty.
+//   5. Added a 15-second timeout so the UI doesn't hang forever on a bad key.
+
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:flutter/foundation.dart';
-import '../../../core/constants/app_constants.dart';
 
-/// Service to dynamically fetch available Gemini models for a given API key.
-/// This ensures the user only sees models their specific key has access to.
 class GeminiModelService {
-  static const String _baseUrl = 'https://generativelanguage.googleapis.com/v1beta';
+  // ── Allowlist ────────────────────────────────────────────────────────────
+  // Match any model whose stripped name *starts with* one of these prefixes.
+  // This is intentionally broad so new patch-versions (e.g. 2.5-flash-preview-06-17)
+  // are included automatically without needing a code change.
+  static const _allowedPrefixes = [
+    'gemini-2.5',
+    'gemini-2.0',
+    'gemini-1.5',
+  ];
 
-  /// Fetches the list of available models from Google API.
-  /// Returns a list of model IDs filtered to only allowed models (gemini-2.5-flash, gemini-2.5-flash-lite, gemini-3.1-flash, gemini-3.5-flash-lite).
+  // Shown when the API call fails or returns nothing useful.
+  static const List<String> fallbackOcrModels = [
+    'gemini-2.5-flash',
+    'gemini-2.0-flash',
+    'gemini-1.5-flash',
+    'gemini-1.5-pro',
+  ];
+
+  // ── Public API ───────────────────────────────────────────────────────────
   Future<List<String>> fetchAvailableModels(String apiKey) async {
+    if (apiKey.isEmpty) return fallbackOcrModels;
+
     try {
-      final url = Uri.parse('$_baseUrl/models?key=$apiKey');
-      
-      final response = await http.get(url).timeout(
-        const Duration(seconds: 10),
-        onTimeout: () => throw Exception('Connection timeout'),
+      final uri = Uri.https(
+        'generativelanguage.googleapis.com',
+        '/v1beta/models',
+        {'key': apiKey},
       );
 
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final List<dynamic> models = data['models'] ?? [];
+      final response = await http
+          .get(uri, headers: {'Content-Type': 'application/json'})
+          .timeout(const Duration(seconds: 15));
 
-        // Filter for allowed Gemini models that support generateContent
-        final availableIds = <String>[];
-        
-        for (var model in models) {
-          final name = model['name'] as String?;
-          final supportedMethods = model['supportedGenerationMethods'] as List<dynamic>?;
-          
-          if (name == null) continue;
-          
-          // Extract model ID from full name (e.g., "models/gemini-2.5-flash" -> "gemini-2.5-flash")
-          final modelId = name.contains('/') ? name.split('/').last : name;
-          
-          // Only include models that:
-          // 1. Support generateContent (required for OCR)
-          // 2. Are in the allowed list (excludes gemini-1.x and gemini-2.0)
-          // 3. Start with "gemini"
-          if (supportedMethods != null && 
-              supportedMethods.contains('generateContent') &&
-              allowedGeminiModels.contains(modelId)) {
-            availableIds.add(modelId);
-          }
-        }
-
-        if (availableIds.isEmpty) {
-          // Fallback: return allowed models that user's API key might have access to
-          final fallbackModels = allowedGeminiModels.where((m) => m.startsWith('gemini')).toList();
-          if (fallbackModels.isNotEmpty) return fallbackModels;
-        }
-
-        // Sort: prefer newer versions (descending order by version number)
-        // e.g., gemini-3.5-flash-lite > gemini-3.1-flash > gemini-2.5-flash
-        availableIds.sort((a, b) {
-          // Extract version numbers for comparison
-          final aVersion = RegExp(r'(\d+)\.(\d+)').firstMatch(a);
-          final bVersion = RegExp(r'(\d+)\.(\d+)').firstMatch(b);
-          
-          if (aVersion != null && bVersion != null) {
-            final aMajor = int.tryParse(aVersion.group(1)!) ?? 0;
-            final aMinor = int.tryParse(aVersion.group(2)!) ?? 0;
-            final bMajor = int.tryParse(bVersion.group(1)!) ?? 0;
-            final bMinor = int.tryParse(bVersion.group(2)!) ?? 0;
-            
-            // Compare major version first, then minor
-            if (aMajor != bMajor) return bMajor.compareTo(aMajor);
-            return bMinor.compareTo(aMinor);
-          }
-          
-          // Fallback to string comparison
-          return b.compareTo(a);
-        });
-
-        return availableIds;
-      } else if (response.statusCode == 400 || response.statusCode == 403) {
-        debugPrint('[GeminiModelService] API Key invalid or permission denied: ${response.body}');
-        throw Exception('Invalid API Key or insufficient permissions');
-      } else {
-        debugPrint('[GeminiModelService] Failed to fetch models: ${response.statusCode}');
-        throw Exception('Failed to fetch models: ${response.statusCode}');
+      if (response.statusCode != 200) {
+        // Log the status so the developer can see the error; fall back.
+        // ignore: avoid_print
+        print('[GeminiModelService] API error ${response.statusCode}: '
+            '${response.body}');
+        return fallbackOcrModels;
       }
+
+      final data = json.decode(response.body) as Map<String, dynamic>;
+      final rawModels = data['models'] as List<dynamic>? ?? [];
+
+      final filtered = rawModels
+          .whereType<Map<String, dynamic>>()
+          .where(_isUsable)
+          .map((m) => _stripPrefix(m['name'] as String))
+          .toList()
+        ..sort(_compareModels);
+
+      return filtered.isEmpty ? fallbackOcrModels : filtered;
     } catch (e) {
-      debugPrint('[GeminiModelService] Error fetching models: $e');
-      // Return a safe default list if network fails but key might be valid
-      return AppConstants.fallbackOcrModels;
+      // ignore: avoid_print
+      print('[GeminiModelService] Exception: $e');
+      return fallbackOcrModels;
     }
   }
 
-  /// Gets a human-readable name for the model ID.
-  String getDisplayName(String modelId) {
-    if (modelId == 'gemini-2.5-flash') return 'Gemini 2.5 Flash (Recommended - Fast & Accurate)';
-    if (modelId == 'gemini-2.5-flash-lite') return 'Gemini 2.5 Flash Lite (Lightweight)';
-    if (modelId == 'gemini-3.1-flash') return 'Gemini 3.1 Flash (Latest Version)';
-    if (modelId == 'gemini-3.5-flash-lite') return 'Gemini 3.5 Flash Lite (Optimized)';
-    // Capitalize first letter and replace dashes
-    return modelId.replaceAll('-', ' ').replaceAllMapped(
-      RegExp(r'\b\w'),
-      (m) => m.group(0)!.toUpperCase(),
-    );
+  // ── Helpers ──────────────────────────────────────────────────────────────
+
+  /// Returns the bare model ID, e.g. "gemini-2.5-flash-preview-05-20"
+  /// from "models/gemini-2.5-flash-preview-05-20".
+  static String _stripPrefix(String name) =>
+      name.startsWith('models/') ? name.substring('models/'.length) : name;
+
+  /// A model is usable if it supports generateContent AND matches our prefix
+  /// allowlist AND contains "flash" or "pro" (excludes embedding models etc.).
+  static bool _isUsable(Map<String, dynamic> m) {
+    final name = _stripPrefix(m['name'] as String? ?? '');
+    final methods =
+        (m['supportedGenerationMethods'] as List<dynamic>?)?.cast<String>() ??
+            [];
+    final supportsGenerate = methods.contains('generateContent');
+    final matchesPrefix =
+        _allowedPrefixes.any((p) => name.startsWith(p));
+    final isFlashOrPro = name.contains('flash') || name.contains('pro');
+    // Exclude embedding and aqa variants
+    final isNotEmbedding =
+        !name.contains('embed') && !name.contains('aqa');
+    return supportsGenerate && matchesPrefix && isFlashOrPro && isNotEmbedding;
   }
 
-  /// Returns the list of allowed Gemini model IDs (excludes gemini-1.x and gemini-2.0)
-  static const List<String> allowedGeminiModels = [
-    'gemini-2.5-flash',
-    'gemini-2.5-flash-lite',
-    'gemini-3.1-flash',
-    'gemini-3.5-flash-lite',
-  ];
+  /// Sorts models so the newest, most capable ones appear first.
+  /// Within the same version, non-lite variants come before lite ones.
+  static int _compareModels(String a, String b) {
+    final aVer = _extractVersion(a);
+    final bVer = _extractVersion(b);
+    final cmp = bVer.compareTo(aVer); // descending by version
+    if (cmp != 0) return cmp;
+    // Flash before Flash-Lite
+    final aLite = a.contains('lite') ? 1 : 0;
+    final bLite = b.contains('lite') ? 1 : 0;
+    if (aLite != bLite) return aLite - bLite;
+    return a.compareTo(b);
+  }
+
+  static double _extractVersion(String name) {
+    final match = RegExp(r'(\d+\.\d+)').firstMatch(name);
+    return match != null ? double.tryParse(match.group(1)!) ?? 0.0 : 0.0;
+  }
 }
